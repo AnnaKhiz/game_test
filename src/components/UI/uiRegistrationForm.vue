@@ -48,7 +48,10 @@
 
 <script setup lang="ts">
 import {ref} from "vue";
-import type { User } from '@/interfaces'
+import type { User } from '@/interfaces';
+import { set, ref as dbRef, push } from "firebase/database";
+import "firebase/database";
+import { database } from '@/firebase.js'
 
 const form = ref<User>({
   name: '',
@@ -56,62 +59,20 @@ const form = ref<User>({
   email: '',
   password: '',
   passwordConfirm: ''
-})
+});
 
-const submitForm = () => {
+
+const submitForm = async () => {
   console.log(form.value)
+  const newUsersRef = dbRef(database, 'users/');
+  try {
+    const usersRef = push(newUsersRef);
+    await set(usersRef, form.value);
+    console.log('Пользователи успешно добавлены');
+  } catch (error) {
+    console.error('Ошибка при добавлении пользователей:', error);
+  }
 }
-
-
-// import { ref } from 'vue';
-//
-// import { set, ref as dbRef, get, child } from "firebase/database";
-// import "firebase/database";
-// import { database } from './firebase.js'
-// import type { User } from './interfaces'
-// import NavigationCompopnent from "@/components/NavigationCompopnent.vue";
-//
-//
-//
-// const users = ref<User[] | null>(null);
-//
-// const addUser = async () => {
-//   try {
-//     const usersRef = dbRef(database, 'users/');
-//     await set(usersRef, {
-//       user1: {
-//         name: "John Doe",
-//         email: "john.doe@example.com"
-//       },
-//       user2: {
-//         name: "Jane Smith",
-//         email: "jane.smith@example.com"
-//       }
-//     });
-//     console.log('Пользователи успешно добавлены');
-//   } catch (error) {
-//     console.error('Ошибка при добавлении пользователей:', error);
-//   }
-// };
-// addUser()
-// console.log(database)
-//
-// const fetchUsers = async () => {
-//   try {
-//     const db = dbRef(database);
-//     const snapshot = await get(child(db, `users/`));
-//     if (snapshot.exists()) {
-//       users.value = Object.values(snapshot.val()) as User[];
-//       console.log('Данные пользователей:', users.value);
-//     } else {
-//       console.log("Нет данных");
-//     }
-//   } catch (error) {
-//     console.error("Ошибка при получении данных:", error);
-//   }
-// }
-//
-// fetchUsers()
 
 
 </script>

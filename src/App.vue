@@ -1,10 +1,10 @@
 <template>
-  <navigation-compopnent />
+  <navigation-component />
   <router-view/>
 </template>
 
 <script lang="ts" setup>
-import NavigationCompopnent from "@/components/NavigationCompopnent.vue";
+import NavigationComponent from "@/components/NavigationComponent.vue";
 
 </script>
 
