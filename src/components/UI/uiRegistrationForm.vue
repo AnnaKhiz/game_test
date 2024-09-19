@@ -38,7 +38,7 @@
     <button
       @click.prevent="submitForm"
     >
-      Submit
+      Sign in
     </button>
 
   </form>
@@ -46,12 +46,15 @@
 
 <script setup lang="ts">
 import {ref} from "vue";
-import type { User } from '@/interfaces';
-import { set, ref as dbRef, push } from "firebase/database";
+import type { UserRegist } from '@/interfaces';
+import { createUserWithEmailAndPassword } from "firebase/auth"
+import { set, ref as dbRef } from "firebase/database";
 import "firebase/database";
-import { database } from '@/firebase.js'
+import { database, auth } from '@/firebase.js';
+// import bcrypt from 'bcryptjs';
 
-const form = ref<User>({
+
+const form = ref<UserRegist>({
   name: '',
   surname: '',
   email: '',
@@ -59,18 +62,48 @@ const form = ref<User>({
   passwordConfirm: ''
 });
 
+// const hashedPassword = ref<string | null>(null);
+
+// const hashPassword = async () => {
+//   try {
+//     const saltRounds = 10;
+//     hashedPassword.value = await bcrypt.hash(form.value.password, saltRounds);
+//   } catch (error) {
+//     console.error('Error hashing password:', error);
+//   }
+// };
 
 const submitForm = async () => {
+  // await hashPassword();
+
   console.log(form.value)
-  const newUsersRef = dbRef(database, 'users/');
   try {
-    const usersRef = push(newUsersRef);
-    await set(usersRef, form.value);
-    console.log('Пользователи успешно добавлены');
+    const userCredential = await createUserWithEmailAndPassword(auth, form.value.email, form.value.password);
+    const user = userCredential.user;
+
+    const newUserRef = dbRef(database, 'users/' + user.uid);
+    const { name, surname, email } = form.value;
+    const newUserData = {  name, surname, email};
+
+    await set(newUserRef, newUserData);
+    console.log('User successfully added:', user);
   } catch (error) {
-    console.error('Ошибка при добавлении пользователей:', error);
+    console.error('Error adding user:', error.message);
   }
+  // try {
+  //   const userCredential = await createUserWithEmailAndPassword(auth, form.value.email, form.value.password);
+  //   const user = userCredential.user;
+  //   const newUsersRef = dbRef(database, 'users/' + user.uid);
+  //
+  //   // const usersRef = push(newUsersRef);
+  //   await set(newUsersRef, form.value);
+  //   console.log('Пользователи успешно добавлены');
+  // } catch (error) {
+  //   console.error('Ошибка при добавлении пользователей:', error);
+  // }
 }
+
+
 
 
 </script>

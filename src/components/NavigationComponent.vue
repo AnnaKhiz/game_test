@@ -1,19 +1,34 @@
 <template>
   <div class="main-navigation">
+    {{isAuthorized}}
     <button @click="router.push({name: 'users-list'})">Home</button>
-    <button @click="router.push({name: 'registration'})">Registration</button>
+    <button @click="isAuthorized === 'true' ? logOutUser() : logInUser() ">{{ buttonLabel }}</button>
   </div>
 </template>
 
 
 <script setup lang="ts">
+import {computed} from 'vue';
 import {  useRouter, Router } from 'vue-router'
+import { useLocalStorage } from '@/composables/useLocalStorage';
 
 const router: Router = useRouter();
+const isAuthorized = useLocalStorage<string>('authorized', 'false')
+
+const logInUser = () => {
+  router.push({name: 'login'})
+}
+
+const logOutUser = () => {
+  isAuthorized.value = 'false'
+}
+
+const buttonLabel = computed(() => isAuthorized.value === 'true' ? 'Logout' : 'Log in')
+
 
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .main-navigation {
   margin-bottom: 60px;
   padding: 20px 40px;
@@ -22,6 +37,9 @@ const router: Router = useRouter();
   justify-content: flex-start;
   gap: 15px;
   background-color: antiquewhite;
+  & > button {
+    border: 1px solid gray
+  }
 }
 
 </style>

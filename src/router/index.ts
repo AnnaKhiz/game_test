@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import UsersList from "@/components/UsersList.vue";
-import RegistrationComponent from "@/components/RegistrationPage.vue";
+import RegistrationComponent from "@/components/LogInRegistrationPage.vue";
+import LogInRegistrationPage from "@/components/LogInRegistrationPage.vue";
 
 const routes = [
   {
@@ -13,12 +14,21 @@ const routes = [
     },
   },
   {
-    path: '/registration',
-    name: 'registration',
-    component: RegistrationComponent,
+    path: '/register',
+    name: 'register',
+    component: LogInRegistrationPage,
     props: true,
     meta: {
       title: 'Registration page',
+    },
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: LogInRegistrationPage,
+    props: true,
+    meta: {
+      title: 'Login page',
     },
   }
 ]
