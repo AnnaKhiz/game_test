@@ -1,6 +1,5 @@
 <template>
   <form action="" class="registration-form">
-    <code>{{form}}</code>
     <label for="name" class="registration-form__label">Name</label>
     <input
       v-model="form.name"
@@ -37,7 +36,6 @@
     />
 
     <button
-      class="registration-form__button"
       @click.prevent="submitForm"
     >
       Submit
@@ -102,12 +100,6 @@ const submitForm = async () => {
       margin-bottom: 30px;
     }
   }
-  &__button {
-    display: block;
-    width: 200px;
-    padding: 10px 15px;
-    border-radius: 12px;
-    border: none;
-  }
 }
+
 </style>

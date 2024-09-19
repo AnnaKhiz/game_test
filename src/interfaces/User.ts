@@ -3,5 +3,6 @@ export interface User {
   surname: string;
   email: string;
   password: string;
-  passwordConfirm?: string
+  passwordConfirm?: string;
+  rating?: string
 }

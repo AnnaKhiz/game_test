@@ -16,10 +16,12 @@ const router: Router = useRouter();
 <style scoped>
 .main-navigation {
   margin-bottom: 60px;
+  padding: 20px 40px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 15px;
+  background-color: antiquewhite;
 }
 
 </style>

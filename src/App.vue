@@ -1,6 +1,8 @@
 <template>
   <navigation-component />
-  <router-view/>
+  <div class="container">
+    <router-view/>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -14,13 +16,15 @@ import NavigationComponent from "@/components/NavigationComponent.vue";
   margin: 0;
   padding: 0;
 }
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-
+.container {
+  margin: 20px 40px;
+}
+button {
+  display: block;
+  width: 100px;
+  padding: 10px 15px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
 }
 </style>
