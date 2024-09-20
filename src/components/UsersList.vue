@@ -1,9 +1,9 @@
 <template>
   <h2 class="main__title">{{ isAuthorized === 'true' ? `Welcome ${name}` : 'Users list' }}</h2>
-  <router-view v-if="router.currentRoute.value.path.match(/comments/)" />
+  <router-view v-if="isCommentsRoute" :author="name"/>
   <div v-else>
     <div v-if="users.length" class="container-users">
-      <div v-for="(user, index) in filteredUsers" :key="user.email" class="user-item">
+      <div v-for="user in filteredUsers" :key="user.email" class="user-item">
         <div>
           <p>Name: {{user.name}}</p>
           <p>Surname: {{user.surname}}</p>
@@ -17,7 +17,7 @@
             v-for="star in ratingQuantity"
             :key="star"
             :class="{'checked' : star <= user.rating}"
-            @click="setRating(star, user.id, index)"
+
           >
             ★
           </span>
@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref as dbRef, get, child, update, DatabaseReference } from "firebase/database";
+import { ref as dbRef, get, child, DatabaseReference } from "firebase/database";
 import { database } from '@/firebase.js';
 import {onMounted, ref, defineProps, computed } from "vue";
 import { useRouter, Router } from 'vue-router';
@@ -47,6 +47,10 @@ const props = defineProps<PropsObject>();
 
 const isAuthorized = useLocalStorage<string>('authorized', 'false', {
   mergeDefaults: true
+})
+
+const isCommentsRoute = computed(() => {
+  return router.currentRoute.value.path.match(/comments/)
 })
 
 const users = ref<UserRegist[]>([]);
@@ -80,20 +84,20 @@ const fetchUsers = async () => {
   }
 }
 
-const setRating = async (item: number, userId: number, index: number): Promise<void> => {
+// const setRating = async (item: number, userId: number, index: number): Promise<void> => {
+//
+//   await updateRating(item, userId)
+//   users.value[index].rating = item
+// }
 
-  await updateRating(item, userId)
-  users.value[index].rating = item
-}
-
-const updateRating = async (item: number, userId: number): Promise<void> => {
-  const userRef: DatabaseReference = dbRef(database, `users/${userId}`);
-  try {
-    await update(userRef, { rating: item })
-  } catch (error) {
-    console.log(error)
-  }
-}
+// const updateRating = async (item: number, userId: number): Promise<void> => {
+//   const userRef: DatabaseReference = dbRef(database, `users/${userId}`);
+//   try {
+//     await update(userRef, { rating: item })
+//   } catch (error) {
+//     console.log(error)
+//   }
+// }
 
 const getAuthUserInfo = async () => {
   if (props.userId) {
@@ -125,6 +129,7 @@ onMounted(async () => {
 <style scoped>
 .main__title {
   text-align: center;
+  margin-bottom: 20px;
 }
 .container-users {
   display: flex;
@@ -161,12 +166,8 @@ onMounted(async () => {
   align-items: center;
   justify-content: space-between;
   & > div span {
-    cursor: pointer;
     font-size: 1.2rem;
     &.checked {
-      color: red;
-    }
-    &:hover {
       color: red;
     }
   }
