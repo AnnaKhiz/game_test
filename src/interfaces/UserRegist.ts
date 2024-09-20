@@ -5,5 +5,6 @@ export interface UserRegist {
   email: string;
   password: string;
   passwordConfirm?: string;
-  rating?: string
+  rating?: string;
+  role?: string;
 }

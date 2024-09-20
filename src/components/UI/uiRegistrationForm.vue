@@ -26,6 +26,9 @@
       v-model="form.password"
       type="password"
       placeholder="Enter password..."
+      @error="form.password !== form.passwordConfirm"
+      @input="errorHandler"
+      :class="{ 'error': form.password !== form.passwordConfirm}"
     />
 
     <label for="password-confirm" class="registration-form__label">Confirm password</label>
@@ -33,27 +36,36 @@
       v-model="form.passwordConfirm"
       type="password"
       placeholder="Enter password again..."
+      @error="form.password !== form.passwordConfirm"
+      @input="errorHandler"
+      :class="{ 'error': form.password !== form.passwordConfirm}"
     />
 
-    <button
-      @click.prevent="submitForm"
-    >
-      Sign in
-    </button>
+    <p class="info-message " :class="isAuthorized === 'false' ? 'error' : 'success'">{{ infoMessage }}</p>
+
+    <button @click.prevent="submitForm" :disabled="form.password !== form.passwordConfirm">Sign in</button>
 
   </form>
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
+import {  useRouter, Router } from 'vue-router';
 import type { UserRegist } from '@/interfaces';
 import { createUserWithEmailAndPassword } from "firebase/auth"
 import { set, ref as dbRef } from "firebase/database";
+import { useLocalStorage } from '@vueuse/core';
 import "firebase/database";
 import { database, auth } from '@/firebase.js';
-// import bcrypt from 'bcryptjs';
+
+const router: Router = useRouter();
+
+const isAuthorized = useLocalStorage<string>('authorized', 'false', {
+  mergeDefaults: true
+})
 
 
+const infoMessage = ref<string>('');
 const form = ref<UserRegist>({
   name: '',
   surname: '',
@@ -62,21 +74,27 @@ const form = ref<UserRegist>({
   passwordConfirm: ''
 });
 
-// const hashedPassword = ref<string | null>(null);
+const errorHandler = () => {
+  form.value.password !== form.value.passwordConfirm ? infoMessage.value = 'Passwords are not equal!' : infoMessage.value = ''
+}
 
-// const hashPassword = async () => {
-//   try {
-//     const saltRounds = 10;
-//     hashedPassword.value = await bcrypt.hash(form.value.password, saltRounds);
-//   } catch (error) {
-//     console.error('Error hashing password:', error);
-//   }
-// };
+const validateForm = () => {
+  const { name, surname, email, password, passwordConfirm } = form.value;
+
+  if (!name || !surname || !email || !password || !passwordConfirm ) {
+    infoMessage.value = 'Fill all empty fields!';
+    return false
+  } else {
+    return true;
+  }
+}
 
 const submitForm = async () => {
-  // await hashPassword();
 
-  console.log(form.value)
+  if (!validateForm()) {
+    return
+  }
+
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, form.value.email, form.value.password);
     const user = userCredential.user;
@@ -86,21 +104,38 @@ const submitForm = async () => {
     const newUserData = {  name, surname, email};
 
     await set(newUserRef, newUserData);
-    console.log('User successfully added:', user);
-  } catch (error) {
-    console.error('Error adding user:', error.message);
+    isAuthorized.value = 'true';
+    form.value = {
+      name: '',
+      surname: '',
+      email: '',
+      password: '',
+      passwordConfirm: ''
+    }
+
+    infoMessage.value = 'User successfully added.';
+
+
+    setTimeout(() => {
+      infoMessage.value = '';
+
+      router.push({name: 'users-list'});
+    }, 1000)
+
+  } catch (error: unknown) {
+    isAuthorized.value = 'false';
+    if (error instanceof Error) {
+      if (error.message.includes('auth/invalid-email')) {
+        infoMessage.value = 'Registration error! Invalid email format!';
+      }
+      if (error.message.includes('auth/weak-password')) {
+        infoMessage.value = 'Registration error! Password length should be at least 6 symbols!';
+      }
+    }
   }
-  // try {
-  //   const userCredential = await createUserWithEmailAndPassword(auth, form.value.email, form.value.password);
-  //   const user = userCredential.user;
-  //   const newUsersRef = dbRef(database, 'users/' + user.uid);
-  //
-  //   // const usersRef = push(newUsersRef);
-  //   await set(newUsersRef, form.value);
-  //   console.log('Пользователи успешно добавлены');
-  // } catch (error) {
-  //   console.error('Ошибка при добавлении пользователей:', error);
-  // }
+onMounted(() => {
+  infoMessage.value = ''
+})
 }
 
 
@@ -111,6 +146,7 @@ const submitForm = async () => {
 <style scoped lang="scss">
 
 .registration-form {
+  position: relative;
   max-width: 500px;
   margin: auto;
   text-align: left;
@@ -126,13 +162,39 @@ const submitForm = async () => {
     border-radius: 12px;
     border: none;
     box-shadow: 1px 1px 3px gray;
+    &.error {
+      box-shadow: 1px 1px 3px red;
+      //border: 1px solid red;
+    }
     &:focus {
       outline: none;
     }
     &:last-of-type {
-      margin-bottom: 30px;
+      margin-bottom: 40px;
+    }
+  }
+  &__action {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 15px;
+    & > button {
+      display: inline;
     }
   }
 }
+.info-message {
+  position: absolute;
+  bottom: 45px;
+  left: 0;
+  font-size: 0.9rem;
+  &.error {
+    color: red;
+  }
+  &.success {
+    color: green;
+  }
+}
+
 
 </style>

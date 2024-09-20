@@ -14,7 +14,9 @@
     "firebase": "^10.13.2",
     "vue": "^3.2.13",
     "vue-router": "^4.4.5",
-    "vuefire": "^3.2.0"
+    "vue-yup-form": "^1.0.8",
+    "vuefire": "^3.2.0",
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
