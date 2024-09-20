@@ -1,6 +1,6 @@
 <template>
   <div class="main-navigation">
-    <button @click="router.currentRoute.value.path.match(/^\/admin/) ? router.push({name: 'admin-users'}) : router.push({name: 'users-list'})">Home</button>
+    <button @click="goToHomePage">Home</button>
     <button @click="isAuthorized === 'true' ? logOutUser() : logInUser() ">{{ buttonLabel }}</button>
   </div>
 </template>
@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import {computed} from 'vue';
-import {  useRouter, Router } from 'vue-router'
+import { useRouter, Router } from 'vue-router'
 import { useLocalStorage } from '@vueuse/core';
 
 const router: Router = useRouter();
@@ -27,6 +27,17 @@ const logOutUser = () => {
 
 const buttonLabel = computed(() => isAuthorized.value === 'true' ? 'Logout' : 'Log in')
 
+const goToHomePage = () => {
+  if (router.currentRoute.value.path.match(/^\/admin/)) {
+    router.push({name: 'admin-users'})
+    return
+  }
+  if (isAuthorized.value === 'true') {
+    router.push({name: 'users-list-auth'})
+    return
+  }
+  router.push({name: 'users-list'})
+}
 
 </script>
 

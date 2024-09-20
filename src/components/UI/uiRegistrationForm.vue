@@ -101,7 +101,7 @@ const submitForm = async () => {
 
     const newUserRef = dbRef(database, 'users/' + user.uid);
     const { name, surname, email } = form.value;
-    const newUserData = {  name, surname, email };
+    const newUserData = {  name, surname, email, rating: 0 };
 
     await set(newUserRef, newUserData);
     isAuthorized.value = 'true';
@@ -119,7 +119,7 @@ const submitForm = async () => {
     setTimeout(() => {
       infoMessage.value = '';
 
-      router.push({name: 'users-list'});
+      router.push({name: 'users-list-auth', params: { userId: user.uid }});
     }, 1000)
 
   } catch (error: unknown) {

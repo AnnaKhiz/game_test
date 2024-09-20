@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import {defineProps, ref} from "vue";
-import type { UserLogin, PropsAdmin } from '@/interfaces';
+import type { UserLogin, PropsObject } from '@/interfaces';
 import {  useRouter, Router } from 'vue-router'
 const router: Router = useRouter();
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -41,7 +41,7 @@ const isAuthorized = useLocalStorage<string>('authorized', 'false', {
   mergeDefaults: true
 })
 
-const props = defineProps<PropsAdmin>();
+const props = defineProps<PropsObject>();
 
 const form = ref<UserLogin>({
   email: '',
@@ -80,8 +80,10 @@ const logIn = async () => {
     border-radius: 12px;
     border: none;
     box-shadow: 1px 1px 3px gray;
+
     &:focus {
       outline: none;
+      box-shadow: 1px 1px 4px gray inset;
     }
     &:last-of-type {
       margin-bottom: 30px;

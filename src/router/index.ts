@@ -5,6 +5,7 @@ import LogInRegistrationPage from "@/components/LogInRegistrationPage.vue";
 import AdminMainPage from "@/components/admin/AdminMainPage.vue";
 import AdminLogin from "@/components/admin/AdminLogin.vue";
 import AdminUsersList from "@/components/admin/AdminUsersList.vue";
+import UserComments from "@/components/UserComments.vue";
 
 const routes = [
   {
@@ -24,6 +25,17 @@ const routes = [
     meta: {
       title: 'Users list',
     },
+    children: [
+      {
+        path: 'comments/:userCommentId',
+        name: 'users-comments',
+        component: UserComments,
+        props: true,
+        meta: {
+          title: 'User comments',
+        },
+      }
+    ]
   },
   {
     path: '/register',

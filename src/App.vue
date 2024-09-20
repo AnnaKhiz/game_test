@@ -27,5 +27,10 @@ button {
   border-radius: 12px;
   border: none;
   cursor: pointer;
+  transition: background-color 0.3s ease-in-out 0s, color 0.3s ease-in-out 0s;
+  &:hover {
+    background-color: bisque;
+    color: cornflowerblue;
+  }
 }
 </style>

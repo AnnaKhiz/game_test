@@ -3,8 +3,8 @@ export interface UserRegist {
   name: string;
   surname: string;
   email: string;
-  password: string;
+  password?: string;
   passwordConfirm?: string;
-  rating?: string;
+  rating?: number;
   role?: string;
 }
