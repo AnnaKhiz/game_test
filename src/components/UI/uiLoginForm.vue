@@ -32,8 +32,10 @@ const router: Router = useRouter();
 import { signInWithEmailAndPassword } from "firebase/auth";
 import "firebase/database";
 import { auth } from '@/firebase.js';
-import { useLocalStorage } from '@/composables/useLocalStorage';
-const isAuthorized = useLocalStorage<string>('authorized', 'false')
+import { useLocalStorage } from '@vueuse/core';
+const isAuthorized = useLocalStorage<string>('authorized', 'false', {
+  mergeDefaults: true
+})
 
 const form = ref<UserLogin>({
   email: '',

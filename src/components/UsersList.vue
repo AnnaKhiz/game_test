@@ -9,7 +9,6 @@
         <p>Rating: {{user.rating || 0}}</p>
       </div>
 
-
       <div v-if="isAuthorized === 'true'">
         <button>Comments</button>
       </div>
@@ -23,10 +22,12 @@ import type { UserRegist } from '@/interfaces';
 import { ref as dbRef, get, child } from "firebase/database";
 import "firebase/database";
 import { database } from '@/firebase.js'
-import {useLocalStorage} from "@/composables/useLocalStorage";
+import { useLocalStorage } from '@vueuse/core';
 const users = ref<UserRegist[]>([]);
 
-const isAuthorized = useLocalStorage<string>('authorized', 'false')
+const isAuthorized = useLocalStorage<string>('authorized', 'false', {
+  mergeDefaults: true
+})
 
 const fetchUsers = async () => {
   try {
