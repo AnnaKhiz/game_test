@@ -8,6 +8,7 @@
 <script lang="ts" setup>
 import NavigationComponent from "@/components/NavigationComponent.vue";
 
+
 </script>
 
 <style>

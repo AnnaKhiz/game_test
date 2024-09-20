@@ -1,4 +1,6 @@
 <template>
+  {{props.userId}}
+  <h2 class="main__title">{{ isAuthorized === 'true' ? `Welcome` : 'Users list' }}</h2>
   <div class="container-users">
     <div v-for="user in users" :key="user.email" class="user-item">
       <div>
@@ -9,7 +11,7 @@
         <p>Rating: {{user.rating || 0}}</p>
       </div>
 
-      <div v-if="isAuthorized === 'true'">
+      <div v-if="isAuthorized === 'true' || props.admin">
         <button>Comments</button>
       </div>
     </div>
@@ -17,17 +19,22 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, ref} from "vue";
-import type { UserRegist } from '@/interfaces';
+
+import {onMounted, ref, defineProps} from "vue";
+import type { UserRegist, PropsAdmin } from '@/interfaces';
 import { ref as dbRef, get, child } from "firebase/database";
 import "firebase/database";
 import { database } from '@/firebase.js'
 import { useLocalStorage } from '@vueuse/core';
+
 const users = ref<UserRegist[]>([]);
 
 const isAuthorized = useLocalStorage<string>('authorized', 'false', {
   mergeDefaults: true
 })
+
+const props = defineProps<PropsAdmin>();
+console.log(props)
 
 const fetchUsers = async () => {
   try {
@@ -57,6 +64,9 @@ onMounted(async () => {
 
 
 <style scoped>
+.main__title {
+  text-align: center;
+}
 .container-users {
   display: flex;
   justify-content: space-between;

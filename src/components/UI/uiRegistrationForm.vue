@@ -101,7 +101,7 @@ const submitForm = async () => {
 
     const newUserRef = dbRef(database, 'users/' + user.uid);
     const { name, surname, email } = form.value;
-    const newUserData = {  name, surname, email};
+    const newUserData = {  name, surname, email };
 
     await set(newUserRef, newUserData);
     isAuthorized.value = 'true';

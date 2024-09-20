@@ -20,13 +20,17 @@
       Log in
     </button>
   </form>
-  <h4>Don't have an account yet?</h4>
-  <p>Follow <a href="#" @click="router.push({name: 'register'})" class="login-form__link">this link</a> to get registered</p>
+
+  <div class="info-message-block">
+    <h4> {{ props.admin ? 'Wrong page, are you an admin?' : 'Don\'t have an account yet?' }}</h4>
+    <p>Follow <a href="#" @click="router.push({name: 'register'})" class="login-form__link">this link</a> to get registered {{ props.admin ? 'as user' : ''}}</p>
+  </div>
+
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue";
-import type { UserLogin } from '@/interfaces';
+import {defineProps, ref} from "vue";
+import type { UserLogin, PropsAdmin } from '@/interfaces';
 import {  useRouter, Router } from 'vue-router'
 const router: Router = useRouter();
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -37,18 +41,21 @@ const isAuthorized = useLocalStorage<string>('authorized', 'false', {
   mergeDefaults: true
 })
 
+const props = defineProps<PropsAdmin>();
+
 const form = ref<UserLogin>({
   email: '',
   password: ''
 })
 
 const logIn = async () => {
+
   try {
-    await signInWithEmailAndPassword(auth, form.value.email, form.value.password);
+    const userData = await signInWithEmailAndPassword(auth, form.value.email, form.value.password);
+    console.log(userData.user.uid)
     isAuthorized.value = 'true'
-    // useLocalStorage('authorized', 'true')
-    // localStorage.setItem('authorized', 'true');
-    router.push({name: 'users-list'})
+    props.admin ? router.push({name: 'admin-users'}) : router.push({name: 'users-list-auth', params: { userId: userData.user.uid }})
+
   } catch (error) {
     console.error('Ошибка входа:', error);
   }
@@ -59,7 +66,7 @@ const logIn = async () => {
 <style scoped lang="scss">
 .login-form {
   max-width: 500px;
-  margin: 0 auto 20px;
+  margin: 0 auto 30px;
   text-align: left;
   &__label {
     display: block;
@@ -88,5 +95,9 @@ const logIn = async () => {
       text-decoration: underline;
     }
   }
+}
+.info-message-block {
+  width: fit-content;
+  margin: auto;
 }
 </style>

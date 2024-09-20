@@ -1,6 +1,6 @@
 <template>
   <div class="main-navigation">
-    <button @click="router.push({name: 'users-list'})">Home</button>
+    <button @click="router.currentRoute.value.path.match(/^\/admin/) ? router.push({name: 'admin-users'}) : router.push({name: 'users-list'})">Home</button>
     <button @click="isAuthorized === 'true' ? logOutUser() : logInUser() ">{{ buttonLabel }}</button>
   </div>
 </template>
@@ -21,7 +21,8 @@ const logInUser = () => {
 }
 
 const logOutUser = () => {
-  isAuthorized.value = 'false'
+  isAuthorized.value = 'false';
+  router.push({name: 'users-list'})
 }
 
 const buttonLabel = computed(() => isAuthorized.value === 'true' ? 'Logout' : 'Log in')
