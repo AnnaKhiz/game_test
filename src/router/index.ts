@@ -1,14 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import UsersList from "@/components/UsersList.vue";
-import RegistrationComponent from "@/components/LogInRegistrationPage.vue";
 import LogInRegistrationPage from "@/components/LogInRegistrationPage.vue";
 import AdminMainPage from "@/components/admin/AdminMainPage.vue";
 import AdminLogin from "@/components/admin/AdminLogin.vue";
-import AdminUsersList from "@/components/admin/AdminUsersList.vue";
 import UserComments from "@/components/UserComments.vue";
-import AdminCommentsPage from "@/components/admin/AdminCommentsPage.vue";
+import { RouteLocationNormalized, RouteRecordRaw } from 'vue-router'
 
-const routes = [
+const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'users-list',
@@ -36,17 +34,7 @@ const routes = [
       title: 'User comments',
     },
   },
-    // children: [
-    //   {
-    //     path: 'comments/:userCommentId',
-    //     name: 'users-comments',
-    //     component: UserComments,
-    //     props: true,
-    //     meta: {
-    //       title: 'User comments',
-    //     },
-    //   }
-    // ]
+
   {
     path: '/register',
     name: 'register',
@@ -69,7 +57,7 @@ const routes = [
     path: '/admin',
     name: 'admin',
     component: AdminMainPage,
-    props: true,
+    props: { admin: true },
     meta: {
       title: 'Admin page',
       requiresAuth: true
@@ -79,30 +67,28 @@ const routes = [
         path: 'login',
         name: 'admin-login',
         component: AdminLogin,
-        props: true,
+        props: { admin: true },
       },
       {
         path: 'users/:userId',
         name: 'admin-users',
-        component: AdminUsersList,
-        props: true,
-        // children: [
-        //   {
-        //     path: 'comments/:userCommentId',
-        //     name: 'admin-comments',
-        //     component: AdminCommentsPage,
-        //     props: true,
-        //     meta: {
-        //       title: 'User comments',
-        //     },
-        //   }
-        // ]
+        component: UsersList,
+        props: (route: RouteLocationNormalized) => (
+          {
+            userId: route.params.userId,
+            admin: true
+          }),
       },
       {
         path: 'users/:userId/comments/:userCommentId',
         name: 'admin-comments',
-        component: AdminCommentsPage,
-        props: true,
+        component: UserComments,
+        props: (route: RouteLocationNormalized) => (
+          {
+            userCommentId: route.params.userCommentId,
+            userId: route.params.userId,
+            admin: true
+          }),
         meta: {
           title: 'User comments',
         },
@@ -120,17 +106,12 @@ const router = createRouter({
 
 
 router.beforeEach((to, from, next) => {
-  // const isAuthenticated = localStorage.getItem('auth')
-  // console.log('isAuthenticated', isAuthenticated)
-  // console.log(process.env.BASE_URL)
 
   if (to.matched.some(record => record.meta.requiresAuth)) {
 
     if (to.name === 'admin' ) {
-      console.log('Auth false')
       next('/admin/login');
     } else {
-      console.log('Auth true')
       next();
     }
   } else {
