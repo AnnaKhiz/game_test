@@ -1,6 +1,6 @@
 <template>
   <h2 class="main__title">{{ isAuthorized === 'true' ? `Welcome ${name}` : 'Users list' }}</h2>
-  <router-view v-if="isCommentsRoute" :author="name"/>
+  <router-view v-if="isCommentsRoute" :author="name" @updateRating="updateUsersList"/>
   <div v-else>
     <div v-if="users.length" class="container-users">
       <div v-for="user in filteredUsers" :key="user.email" class="user-item">
@@ -40,7 +40,7 @@ import { database } from '@/firebase.js';
 import {onMounted, ref, defineProps, computed } from "vue";
 import { useRouter, Router } from 'vue-router';
 import { useLocalStorage } from '@vueuse/core';
-import type { UserRegist, PropsObject } from '@/interfaces';
+import {UserRegist, PropsObject, EmitUpdateRating} from '@/interfaces';
 
 const router: Router = useRouter();
 const props = defineProps<PropsObject>();
@@ -115,6 +115,16 @@ const getAuthUserInfo = async () => {
     }
   }
 
+}
+
+const updateUsersList = (value: EmitUpdateRating) => {
+  console.log('emited object!!!!!!!!!!!!!!!!!', value)
+
+  const index = users.value.findIndex(user => user.id === value.id);
+
+  if (index === -1) return;
+
+  users.value[index].rating = value.rating;
 }
 
 onMounted(async () => {

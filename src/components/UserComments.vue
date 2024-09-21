@@ -18,8 +18,8 @@
           <span
             v-for="star in ratingQuantity"
             :key="star"
-            :class="{'checked' : star <= user.rating}"
-            @click="setRating(star, +user.id)"
+            :class="{'checked' : star <= rating}"
+            @click="setRating(star)"
           >
           ★
         </span>
@@ -61,11 +61,11 @@
 </template>
 
 <script setup lang="ts">
-import {defineProps, onMounted, ref} from 'vue';
+import {defineProps, onMounted, ref, defineEmits} from 'vue';
 import {Router, useRouter} from 'vue-router';
 import {DatabaseReference, get, update, query, orderByChild, equalTo} from "firebase/database";
 import {push, ref as dbRef, set} from "@firebase/database";
-import {Comment, PropsObject, UserRegist} from "@/interfaces";
+import {Comment, PropsObject, UserRegist, EmitUpdateRating } from "@/interfaces";
 import {database} from "@/firebase";
 
 const router: Router = useRouter();
@@ -79,6 +79,8 @@ const user = ref<UserRegist>({
   email: '',
   rating: 0
 });
+
+const rating = ref<number>(user.value.rating || 0)
 const comments = ref<Array<Comment>>([]);
 const ratingQuantity = ref<number>(5);
 const form = ref<Comment>({
@@ -89,10 +91,14 @@ const form = ref<Comment>({
 })
 console.log(form.value)
 
-const setRating = async (item: number, userId: number): Promise<void> => {
-  await updateRating(item, userId)
+
+const emit = defineEmits<{ updateRating: [EmitUpdateRating] }>()
+
+const setRating = async (item: number): Promise<void> => {
+  rating.value = item;
+  // await updateRating(item, userId)
   form.value.rating = item
-  user.value.rating = item
+  // user.value.rating = item
   //emit('updateRating')
   // users.value[index].rating = item
 }
@@ -100,7 +106,7 @@ const setRating = async (item: number, userId: number): Promise<void> => {
 const updateRating = async (item: number, userId: number): Promise<void> => {
   const userRef: DatabaseReference = dbRef(database, `users/${userId}`);
   try {
-    await update(userRef, { rating: item })
+    await update(userRef, { rating: item });
   } catch (error) {
     console.log(error)
   }
@@ -116,7 +122,6 @@ const getAuthUserInfo = async () => {
         user.value = { ...data, id: key };
       }
 
-
     } catch (error) {
       console.log(error)
     }
@@ -126,19 +131,13 @@ const getAuthUserInfo = async () => {
 
 const getUserComments = async () => {
   try {
-    const commentsRef = dbRef(database, '/comments');
-
+    const commentsRef = dbRef(database, '/comments')
     const commentsQuery = query(commentsRef, orderByChild('userId'), equalTo(user.value.id));
-
-    console.log(commentsQuery)
-
     const snapshot = await get(commentsQuery);
-    console.log(snapshot.val())
 
     if (snapshot.exists()) {
       const commentsData = snapshot.val();
       comments.value = Object.values(commentsData)
-      console.log('Comments for user:', comments.value);
       return comments;
     } else {
       console.log('No comments found for this user.');
@@ -147,45 +146,55 @@ const getUserComments = async () => {
   } catch (error) {
     console.error('Error fetching comments:', error);
   }
-
-
 }
 
 const saveComment = async () => {
   const data = new Date().toLocaleString();
   form.value.date = data;
-  await addCommentRequest()
-
-
+  await addCommentRequest();
 }
 
+const countUserRating = async () => {
+  const comentsQuantity = comments.value.length;
+  const scores = comments.value.reduce((acc, curValue) => curValue.rating + acc, 0 );
+
+  const ratingAverage = Number((scores / comentsQuantity).toFixed(2));
+
+  await updateRating(ratingAverage, user.value.id);
+
+  user.value.rating = ratingAverage;
+
+  emit('updateRating', { rating: +ratingAverage, id: user.value.id as string })
+}
 
 const addCommentRequest = async () => {
 
   try {
     const newCommentRef = push(dbRef(database, 'comments/'));
-
-    console.log('++++++++++++', form.value)
-    const data = await set(newCommentRef, { ...form.value, userId: user.value.id });
-    console.log('data', data)
+    await set(newCommentRef, { ...form.value, userId: user.value.id });
 
     const commentId = newCommentRef.key;
     const userCommentsRef = dbRef(database, `users/${user.value.id}/comments/${commentId}`);
     await set(userCommentsRef, true);
 
     comments.value.push(form.value)
-    form.value = {
-      rating: 0,
-      text: '',
-      date: '',
-      author: props.author
-    }
-    console.log(comments.value)
 
-    console.log('comment added')
+    resetFormData();
+
+    await countUserRating();
 
   } catch (error) {
-    console.log('Error in adding comment', error)
+    console.log(error)
+  }
+}
+
+const resetFormData = () => {
+  rating.value = 0;
+  form.value = {
+    rating: 0,
+    text: '',
+    date: '',
+    author: props.author
   }
 }
 
