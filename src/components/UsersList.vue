@@ -24,8 +24,14 @@
           </div>
           {{props}}
           <button
-            v-if="isAuthorized === 'true' || props.admin"
+            v-if="isAuthorized === 'true'"
             @click="props.admin ? router.push({name: 'admin-comments', params: { userCommentId: user.id}}) : router.push({name: 'users-comments', params: { userCommentId: user.id}})"
+          >
+            Comments
+          </button>
+          <button
+            v-else
+            @click="router.push({name: 'users-comments', params: { userCommentId: user.id, userId: 'user' }})"
           >
             Comments
           </button>

@@ -29,7 +29,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/:userId/comments/:userCommentId',
     name: 'users-comments',
     component: UserComments,
-    props: true,
+    props: (route: RouteLocationNormalized) => (
+      {
+        userId: route.params.userId || '123',
+        userCommentId: route.params.userCommentId
+      }),
     meta: {
       title: 'User comments',
     },

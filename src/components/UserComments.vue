@@ -13,7 +13,7 @@
     </div>
 
 
-    <div class="comment-form__container">
+    <div v-if="isAuthorized === 'true' || props.admin" class="comment-form__container">
       <div class="rating-block">
         <div>
           <h3>Rate this user</h3>
@@ -71,6 +71,11 @@ import {DatabaseReference, get, update, query, orderByChild, equalTo, remove} fr
 import {push, ref as dbRef, set} from "@firebase/database";
 import {Comment, PropsObject, UserRegist } from "@/interfaces";
 import {database} from "@/firebase";
+import {useLocalStorage} from "@vueuse/core";
+
+const isAuthorized = useLocalStorage<string>('authorized', 'false', {
+  mergeDefaults: true
+})
 
 const router: Router = useRouter();
 const props: PropsObject = defineProps<PropsObject>()
@@ -110,6 +115,7 @@ const setRating = async (item: number): Promise<void> => {
 }
 
 const updateRating = async (item: number, userId: string): Promise<void> => {
+
   const userRef: DatabaseReference = dbRef(database, `users/${userId}`);
   try {
     await update(userRef, { rating: item });
@@ -183,15 +189,19 @@ const saveComment = async () => {
 }
 
 const countUserRating = async () => {
-  const comentsQuantity = comments.value.length;
-  const scores = comments.value.reduce((acc, curValue) => curValue.rating + acc, 0 );
+  if (!comments.value.length) {
+    user.value.rating = 0;
+    return
+  }
 
-  const ratingAverage = Number((scores / comentsQuantity).toFixed(2));
+  const commentsQuantity = comments.value.length;
+  console.log('comentsQuantity', commentsQuantity)
+  const scores = comments.value.reduce((acc, curValue) => curValue.rating + acc, 0 );
+  const ratingAverage = Number((scores / commentsQuantity).toFixed(2));
 
   await updateRating(ratingAverage, user.value.id as string );
 
   user.value.rating = ratingAverage;
-
 }
 
 const addCommentRequest = async () => {
@@ -205,10 +215,8 @@ const addCommentRequest = async () => {
     await set(userCommentsRef, true);
 
     comments.value.push(form.value)
-
-    resetFormData();
-
     await countUserRating();
+    resetFormData();
 
   } catch (error) {
     console.log(error)
@@ -234,21 +242,24 @@ const deleteComment = async (comment: Comment, index: number) => {
     await remove(commentRef);
     await remove(userCommentRef);
 
+    comments.value.splice(index, 1);
+
     await countUserRating();
 
-    comments.value.splice(index, 1)
-
-    console.log('Комментарий и запись пользователя успешно удалены');
   } catch (error) {
     console.log(error)
   }
 }
 
 onMounted(async () => {
+  if (props.userId) {
+    await getAuthorInfo()
+  }
   await getUserInfo()
   await getUserComments()
-  await getAuthorInfo()
+
 })
+
 
 </script>
 
