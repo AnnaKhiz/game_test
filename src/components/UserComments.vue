@@ -1,7 +1,5 @@
 <template>
   <div class="item-comments-container">
-    {{props}}
-    {{}}
     <div v-if="user" class="user-item">
       <div>
         <p>Name: {{user.name}}</p>

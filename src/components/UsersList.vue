@@ -22,7 +22,7 @@
             ★
           </span>
           </div>
-          {{props}}
+
           <button
             v-if="isAuthorized === 'true'"
             @click="props.admin ? router.push({name: 'admin-comments', params: { userCommentId: user.id}}) : router.push({name: 'users-comments', params: { userCommentId: user.id}})"
