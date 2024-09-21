@@ -1,5 +1,7 @@
 <template>
   <div class="item-comments-container">
+    {{props}}
+    {{}}
     <div v-if="user" class="user-item">
       <div>
         <p>Name: {{user.name}}</p>
@@ -45,12 +47,14 @@
       <h3>User comments</h3>
 
       <div v-for="(comment, index) in comments" :key="comment.rating + index" class="comment-list__content">
-        <div class="comment-list__item">
+        <div class="comment-list__item comment">
           <p class="label">Author: {{ comment.author }}</p>
-          <p class="label">{{ comment.date }}</p>
+          <p class="text">{{ comment.text }}</p>
         </div>
-
-        <p class="text">{{ comment.text }}</p>
+        <div class="comment-list__item action">
+          <p class="label">{{ comment.date }}</p>
+          <button v-if="props.admin" @click.prevent="deleteComment(comment, index)">Delete</button>
+        </div>
 
       </div>
     </div>
@@ -61,18 +65,21 @@
 </template>
 
 <script setup lang="ts">
-import {defineProps, onMounted, ref, defineEmits} from 'vue';
+import {defineProps, onMounted, ref} from 'vue';
 import {Router, useRouter} from 'vue-router';
-import {DatabaseReference, get, update, query, orderByChild, equalTo} from "firebase/database";
+import {DatabaseReference, get, update, query, orderByChild, equalTo, remove} from "firebase/database";
 import {push, ref as dbRef, set} from "@firebase/database";
-import {Comment, PropsObject, UserRegist, EmitUpdateRating } from "@/interfaces";
+import {Comment, PropsObject, UserRegist } from "@/interfaces";
 import {database} from "@/firebase";
 
 const router: Router = useRouter();
 const props: PropsObject = defineProps<PropsObject>()
-console.log('props!!!!!!!', props)
-
-
+const authUser = ref<UserRegist>({
+  name: '',
+  surname: '',
+  email: '',
+  rating: 0
+})
 const user = ref<UserRegist>({
   name: '',
   surname: '',
@@ -87,23 +94,22 @@ const form = ref<Comment>({
   rating: 0,
   text: '',
   date: '',
-  author: props.author
+  author: ''
 })
-console.log(form.value)
 
 
-const emit = defineEmits<{ updateRating: [EmitUpdateRating] }>()
+// const emit = defineEmits<{ updateRating: [EmitUpdateRating] }>()
+
+// const isAdminRoute = computed(() => {
+//   return router.currentRoute.value.path.match(/^\/admin/)
+// })
 
 const setRating = async (item: number): Promise<void> => {
   rating.value = item;
-  // await updateRating(item, userId)
-  form.value.rating = item
-  // user.value.rating = item
-  //emit('updateRating')
-  // users.value[index].rating = item
+  form.value.rating = item;
 }
 
-const updateRating = async (item: number, userId: number): Promise<void> => {
+const updateRating = async (item: number, userId: string): Promise<void> => {
   const userRef: DatabaseReference = dbRef(database, `users/${userId}`);
   try {
     await update(userRef, { rating: item });
@@ -111,14 +117,32 @@ const updateRating = async (item: number, userId: number): Promise<void> => {
     console.log(error)
   }
 }
-const getAuthUserInfo = async () => {
+
+const getAuthorInfo = async () => {
+  if (props.userId) {
+    try {
+      const userRef: DatabaseReference = dbRef(database, `users/${props.userId}`);
+      const snapshot = await get(userRef);
+      if (snapshot.exists()) {
+        authUser.value = snapshot.val()
+      }
+
+      console.log(authUser.value.name)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+}
+const getUserInfo = async () => {
   if (props.userCommentId) {
+    console.log('got comment id', props.userCommentId)
     try {
       const userRef: DatabaseReference = dbRef(database, `users/${props.userCommentId}`);
       const snapshot = await get(userRef);
       if (snapshot.exists()) {
-        const key = snapshot.key;
-        const data = snapshot.val();
+        const key: string = snapshot.key as string;
+        const data = snapshot.val() as Omit<UserRegist, 'id'>;
         user.value = { ...data, id: key };
       }
 
@@ -132,13 +156,16 @@ const getAuthUserInfo = async () => {
 const getUserComments = async () => {
   try {
     const commentsRef = dbRef(database, '/comments')
-    const commentsQuery = query(commentsRef, orderByChild('userId'), equalTo(user.value.id));
+    const commentsQuery = query(commentsRef, orderByChild('userId'), equalTo(user.value.id as string));
     const snapshot = await get(commentsQuery);
 
     if (snapshot.exists()) {
-      const commentsData = snapshot.val();
-      comments.value = Object.values(commentsData)
-      return comments;
+      snapshot.forEach(childSnapshot => {
+        const commentId = childSnapshot.key;
+        const commentsData = childSnapshot.val();
+        comments.value.push({commentId: commentId, ...commentsData} as Comment);
+      })
+
     } else {
       console.log('No comments found for this user.');
       return null;
@@ -151,6 +178,7 @@ const getUserComments = async () => {
 const saveComment = async () => {
   const data = new Date().toLocaleString();
   form.value.date = data;
+  form.value.author = authUser.value.surname + ' ' + authUser.value.name
   await addCommentRequest();
 }
 
@@ -160,11 +188,10 @@ const countUserRating = async () => {
 
   const ratingAverage = Number((scores / comentsQuantity).toFixed(2));
 
-  await updateRating(ratingAverage, user.value.id);
+  await updateRating(ratingAverage, user.value.id as string );
 
   user.value.rating = ratingAverage;
 
-  emit('updateRating', { rating: +ratingAverage, id: user.value.id as string })
 }
 
 const addCommentRequest = async () => {
@@ -194,13 +221,33 @@ const resetFormData = () => {
     rating: 0,
     text: '',
     date: '',
-    author: props.author
+    author: ''
+  }
+}
+
+const deleteComment = async (comment: Comment, index: number) => {
+  console.log('comment', comment)
+
+  try {
+    const commentRef = dbRef(database, `comments/${comment.commentId}`);
+    const userCommentRef: DatabaseReference = dbRef(database, `users/${comment.userId}/comments/${comment.commentId}`);
+    await remove(commentRef);
+    await remove(userCommentRef);
+
+    await countUserRating();
+
+    comments.value.splice(index, 1)
+
+    console.log('Комментарий и запись пользователя успешно удалены');
+  } catch (error) {
+    console.log(error)
   }
 }
 
 onMounted(async () => {
-  await getAuthUserInfo()
+  await getUserInfo()
   await getUserComments()
+  await getAuthorInfo()
 })
 
 </script>
@@ -214,6 +261,9 @@ onMounted(async () => {
     }
   }
   &__content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     padding: 10px;
     border-radius: 8px;
     background-color: #f7fafa;
@@ -223,14 +273,19 @@ onMounted(async () => {
     }
   }
   &__item {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-
+    &.comment {
+      max-width: 70%;
+      overflow: hidden;
+    }
     & > p.label {
       font-size: 0.8rem;
       opacity: 0.7;
-      margin-bottom: 5px;
+      margin-bottom: 15px;
+    }
+    &.action {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
     }
 
   }

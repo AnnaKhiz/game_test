@@ -1,11 +1,10 @@
 <template>
-  <users-list admin/>
-  <router-view />
-
+  <user-comments admin />
 </template>
 
 <script setup lang="ts">
-import UsersList from "@/components/UsersList.vue";
+
+import UserComments from "@/components/UserComments.vue";
 </script>
 
 <style scoped lang="scss">

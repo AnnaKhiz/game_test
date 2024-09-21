@@ -6,6 +6,7 @@ import AdminMainPage from "@/components/admin/AdminMainPage.vue";
 import AdminLogin from "@/components/admin/AdminLogin.vue";
 import AdminUsersList from "@/components/admin/AdminUsersList.vue";
 import UserComments from "@/components/UserComments.vue";
+import AdminCommentsPage from "@/components/admin/AdminCommentsPage.vue";
 
 const routes = [
   {
@@ -25,18 +26,27 @@ const routes = [
     meta: {
       title: 'Users list',
     },
-    children: [
-      {
-        path: 'comments/:userCommentId',
-        name: 'users-comments',
-        component: UserComments,
-        props: true,
-        meta: {
-          title: 'User comments',
-        },
-      }
-    ]
   },
+  {
+    path: '/:userId/comments/:userCommentId',
+    name: 'users-comments',
+    component: UserComments,
+    props: true,
+    meta: {
+      title: 'User comments',
+    },
+  },
+    // children: [
+    //   {
+    //     path: 'comments/:userCommentId',
+    //     name: 'users-comments',
+    //     component: UserComments,
+    //     props: true,
+    //     meta: {
+    //       title: 'User comments',
+    //     },
+    //   }
+    // ]
   {
     path: '/register',
     name: 'register',
@@ -72,11 +82,32 @@ const routes = [
         props: true,
       },
       {
-        path: 'users',
+        path: 'users/:userId',
         name: 'admin-users',
         component: AdminUsersList,
         props: true,
+        // children: [
+        //   {
+        //     path: 'comments/:userCommentId',
+        //     name: 'admin-comments',
+        //     component: AdminCommentsPage,
+        //     props: true,
+        //     meta: {
+        //       title: 'User comments',
+        //     },
+        //   }
+        // ]
+      },
+      {
+        path: 'users/:userId/comments/:userCommentId',
+        name: 'admin-comments',
+        component: AdminCommentsPage,
+        props: true,
+        meta: {
+          title: 'User comments',
+        },
       }
+
 
     ]
   },

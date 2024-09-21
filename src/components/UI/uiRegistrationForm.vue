@@ -96,7 +96,7 @@ const submitForm = async () => {
   }
 
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, form.value.email, form.value.password);
+    const userCredential = await createUserWithEmailAndPassword(auth, form.value.email, form.value.password as string);
     const user = userCredential.user;
 
     const newUserRef = dbRef(database, 'users/' + user.uid);

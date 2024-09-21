@@ -52,9 +52,11 @@ const logIn = async () => {
 
   try {
     const userData = await signInWithEmailAndPassword(auth, form.value.email, form.value.password);
-    console.log(userData.user.uid)
+
     isAuthorized.value = 'true'
-    props.admin ? router.push({name: 'admin-users'}) : router.push({name: 'users-list-auth', params: { userId: userData.user.uid }})
+    console.log('is ADMIN', props.admin)
+
+    props.admin ? router.push({name: 'admin-users', params: { userId: userData.user.uid }}) : router.push({name: 'users-list-auth', params: { userId: userData.user.uid }})
 
   } catch (error) {
     console.error('Ошибка входа:', error);

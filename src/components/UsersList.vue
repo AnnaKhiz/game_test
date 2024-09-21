@@ -1,7 +1,8 @@
 <template>
-  <h2 class="main__title">{{ isAuthorized === 'true' ? `Welcome ${name}` : 'Users list' }}</h2>
-  <router-view v-if="isCommentsRoute" :author="name" @updateRating="updateUsersList"/>
-  <div v-else>
+  <h2 class="main__title">{{ isAuthorized === 'true' ? `Welcome ${props.admin ? 'Admin' : name}` : 'Users list' }}</h2>
+
+<!--  <router-view v-if="!props.admin" :author="name" @updateRating="updateUsersList"/>-->
+  <div >
     <div v-if="users.length" class="container-users">
       <div v-for="user in filteredUsers" :key="user.email" class="user-item">
         <div>
@@ -11,18 +12,23 @@
           <p>Rating: {{user.rating || 0}}</p>
         </div>
 
-        <div v-if="isAuthorized === 'true' || props.admin" class="rating-block">
+        <div class="rating-block">
           <div>
           <span
             v-for="star in ratingQuantity"
             :key="star"
             :class="{'checked' : star <= user.rating}"
-
           >
             ★
           </span>
           </div>
-          <button @click="router.push({name: 'users-comments', params: { userCommentId: user.id}})">Comments</button>
+          {{props}}
+          <button
+            v-if="isAuthorized === 'true' || props.admin"
+            @click="props.admin ? router.push({name: 'admin-comments', params: { userCommentId: user.id}}) : router.push({name: 'users-comments', params: { userCommentId: user.id}})"
+          >
+            Comments
+          </button>
         </div>
       </div>
     </div>
@@ -40,7 +46,7 @@ import { database } from '@/firebase.js';
 import {onMounted, ref, defineProps, computed } from "vue";
 import { useRouter, Router } from 'vue-router';
 import { useLocalStorage } from '@vueuse/core';
-import {UserRegist, PropsObject, EmitUpdateRating} from '@/interfaces';
+import {UserRegist, PropsObject} from '@/interfaces';
 
 const router: Router = useRouter();
 const props = defineProps<PropsObject>();
@@ -49,9 +55,9 @@ const isAuthorized = useLocalStorage<string>('authorized', 'false', {
   mergeDefaults: true
 })
 
-const isCommentsRoute = computed(() => {
-  return router.currentRoute.value.path.match(/comments/)
-})
+// const isCommentsRoute = computed(() => {
+//   return router.currentRoute.value.path.match(/comments/)
+// })
 
 const users = ref<UserRegist[]>([]);
 const ratingQuantity = ref<number>(5);
@@ -84,24 +90,9 @@ const fetchUsers = async () => {
   }
 }
 
-// const setRating = async (item: number, userId: number, index: number): Promise<void> => {
-//
-//   await updateRating(item, userId)
-//   users.value[index].rating = item
-// }
-
-// const updateRating = async (item: number, userId: number): Promise<void> => {
-//   const userRef: DatabaseReference = dbRef(database, `users/${userId}`);
-//   try {
-//     await update(userRef, { rating: item })
-//   } catch (error) {
-//     console.log(error)
-//   }
-// }
-
 const getAuthUserInfo = async () => {
   if (props.userId) {
-    console.log('props userId', props.userId)
+
     try {
       const userRef: DatabaseReference = dbRef(database, `users/${props.userId}`);
       const snapshot = await get(userRef);
@@ -109,7 +100,6 @@ const getAuthUserInfo = async () => {
         authUser.value = snapshot.val()
       }
 
-      console.log(authUser.value.name)
     } catch (error) {
       console.log(error)
     }
@@ -117,15 +107,15 @@ const getAuthUserInfo = async () => {
 
 }
 
-const updateUsersList = (value: EmitUpdateRating) => {
-  console.log('emited object!!!!!!!!!!!!!!!!!', value)
-
-  const index = users.value.findIndex(user => user.id === value.id);
-
-  if (index === -1) return;
-
-  users.value[index].rating = value.rating;
-}
+// const updateUsersList = (value: EmitUpdateRating) => {
+//   console.log('emited object!!!!!!!!!!!!!!!!!', value)
+//
+//   const index = users.value.findIndex(user => user.id === value.id);
+//
+//   if (index === -1) return;
+//
+//   users.value[index].rating = value.rating;
+// }
 
 onMounted(async () => {
   await fetchUsers();
