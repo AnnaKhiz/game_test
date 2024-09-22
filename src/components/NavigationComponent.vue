@@ -1,6 +1,7 @@
 <template>
   <div class="main-navigation">
-    <button @click="goToHomePage">Home</button>
+    <ui-button label="Home" @click="goToHomePage" background-color="green"/>
+<!--    <button @click="goToHomePage">Home</button>-->
     <button @click="isAuthorized === 'true' ? logOutUser() : logInUser() ">{{ buttonLabel }}</button>
   </div>
 </template>
@@ -10,6 +11,7 @@
 import {computed} from 'vue';
 import { useRouter, Router } from 'vue-router'
 import { useLocalStorage } from '@vueuse/core';
+import UiButton from "@/components/UI/uiButton.vue";
 
 const router: Router = useRouter();
 const isAuthorized = useLocalStorage<string>('authorized', 'false', {

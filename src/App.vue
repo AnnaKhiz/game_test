@@ -20,17 +20,5 @@ import NavigationComponent from "@/components/NavigationComponent.vue";
 .container {
   margin: 20px 40px;
 }
-button {
-  display: block;
-  width: 100px;
-  padding: 10px 15px;
-  border-radius: 12px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease-in-out 0s, color 0.3s ease-in-out 0s;
-  &:hover {
-    background-color: bisque;
-    color: cornflowerblue;
-  }
-}
+
 </style>
