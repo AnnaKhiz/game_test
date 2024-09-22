@@ -1,38 +1,41 @@
 <template>
+
   <div class="item-comments-container">
+    <h2 class="main-title">User comments</h2>
     <div v-if="user" class="user-item">
-      <div>
-        <p>Name: {{user.name}}</p>
-        <p>Surname: {{user.surname}}</p>
-        <p>Email: {{user.email}}</p>
-        <p>Rating: {{user.rating || 0}}</p>
+      <div class="user-info">
+        <p><span>Name:</span> {{user.name}}</p>
+        <p><span>Surname:</span> {{user.surname}}</p>
+        <p><span>Email:</span> {{user.email}}</p>
+        <p><span>Rating:</span> {{user.rating || 0}}</p>
       </div>
 
-    </div>
-
-
-    <div v-if="isAuthorized === 'true' || props.admin" class="comment-form__container">
-      <div class="rating-block">
-        <div>
-          <h3>Rate this user</h3>
-          <ui-rating-stars :rating="rating" :ratingQuantity="ratingQuantity" @set-rating="setRating"/>
+      <div v-if="isAuthorized === 'true' || props.admin" class="comment-form__container">
+        <div class="rating-block">
+          <div class="rating-scores">
+            <h3>Rate this user</h3>
+            <ui-rating-stars :rating="rating" :ratingQuantity="ratingQuantity" @set-rating="setRating"/>
+          </div>
         </div>
-      </div>
-      <form action="" class="comment-form__form">
-        <label for="text" class="comment-form__label">Comment</label>
-        <textarea
-          v-model="form.text"
-          placeholder="Enter text here..."
-          rows="5"
-        />
+        <form action="" class="comment-form__form">
+          <label for="text" class="comment-form__label">Comment</label>
+          <textarea
+            v-model="form.text"
+            placeholder="Enter text here..."
+            rows="5"
+          />
 
-        <button
-          @click.prevent="saveComment"
-        >
-          Save comment
-        </button>
-      </form>
+          <ui-button
+            label="Save comment"
+            @click="saveComment"
+          />
+        </form>
+      </div>
+
     </div>
+
+
+
 
     <div v-if="comments.length" class="comment-list__container">
       <h3>User comments</h3>
@@ -59,16 +62,11 @@
     </div>
 
   </div>
-
-  <ui-button
-    label="Go back"
-    @click.prevent="router.back()"
-  />
 </template>
 
 <script setup lang="ts">
 import {defineProps, onMounted, ref} from 'vue';
-import {Router, useRouter} from 'vue-router';
+
 import {DatabaseReference, get, update, query, orderByChild, equalTo, remove} from "firebase/database";
 import {push, ref as dbRef, set} from "@firebase/database";
 import {Comment, PropsObject, UserRegist } from "@/interfaces";
@@ -81,7 +79,7 @@ const isAuthorized = useLocalStorage<string>('authorized', 'false', {
   mergeDefaults: true
 })
 
-const router: Router = useRouter();
+
 const props: PropsObject = defineProps<PropsObject>()
 const authUser = ref<UserRegist>({
   name: '',
@@ -270,7 +268,6 @@ onMounted(async () => {
 <style scoped lang="scss">
 .comment-list {
   &__container {
-    padding: 10px;
     & > h3 {
       margin-bottom: 10px;
     }
@@ -281,7 +278,8 @@ onMounted(async () => {
     align-items: flex-start;
     padding: 10px;
     border-radius: 8px;
-    background-color: #f7fafa;
+    background-color: transparent;
+    box-shadow: 1px 1px 6px rgba(66, 66, 66, 0.71);
     margin-bottom: 10px;
     & > p.text {
       font-size: 1rem;
@@ -319,14 +317,17 @@ onMounted(async () => {
 
 .comment-form {
   &__container {
+    width: 80%;
     padding: 10px;
-    background-color: antiquewhite;
+    background: #e8e8e8;
+    box-shadow: 1px 1px 6px #e8e8e8;
     border-radius: 12px;
-    margin-bottom: 20px;
   }
-
   &__form {
     width: 100%;
+    &:deep > .custom-button:hover {
+      box-shadow: 1px 1px 6px #424242;
+    }
 
     & > textarea {
       width: 100%;
@@ -344,6 +345,11 @@ onMounted(async () => {
     & > button {
       width: fit-content;
     }
+    & > label {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 5px;
+    }
   }
   &__label {
     display: block;
@@ -353,10 +359,18 @@ onMounted(async () => {
 }
 
 .item-comments-container {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: auto;
-  border: 1px solid black;
-  padding: 10px;
+  & > .main-title {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  &:deep > .custom-button {
+    margin-bottom: 15px;
+    &:hover {
+      box-shadow: 1px 1px 6px #424242;
+    }
+  }
   &:deep + .custom-button:hover {
     box-shadow: 1px 1px 6px #424242;
   }
@@ -367,6 +381,20 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   width: 100%;
+  padding: 15px;
+  border-radius: 10px;
+  background: #d7d7d7;
+  box-shadow: 1px 1px 10px white;
+  & > .user-info {
+    width: 20%;
+    overflow: hidden;
+    & > p {
+      margin-bottom: 5px;
+      & > span {
+        font-weight: 600;
+      }
+    }
+  }
 
 }
 .rating-block {
@@ -374,11 +402,18 @@ onMounted(async () => {
   margin-bottom: 10px;
   align-items: center;
   justify-content: space-between;
-  & > div h3 {
-    font-weight: 400;
-    font-size: 1rem;
-    margin-bottom: 5px;
+  & > .rating-scores {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    column-gap: 20px;
+    margin-bottom: 15px;
   }
+  & > div h3 {
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
 }
 
 .label {

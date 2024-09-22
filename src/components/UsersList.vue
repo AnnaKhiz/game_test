@@ -1,15 +1,14 @@
 <template>
   <h2 class="main__title">{{ isAuthorized === 'true' ? `Welcome ${props.admin ? 'Admin' : name}` : 'Users list' }}</h2>
 
-<!--  <router-view v-if="!props.admin" :author="name" @updateRating="updateUsersList"/>-->
   <div >
     <div v-if="users.length" class="container-users">
       <div v-for="user in filteredUsers" :key="user.email" class="user-item">
-        <div>
-          <p>Name: {{user.name}}</p>
-          <p>Surname: {{user.surname}}</p>
-          <p>Email: {{user.email}}</p>
-          <p>Rating: {{user.rating || 0}}</p>
+        <div class="user-info">
+          <p><span>Name:</span> {{user.name}}</p>
+          <p><span>Surname:</span> {{user.surname}}</p>
+          <p><span>Email:</span> {{user.email}}</p>
+          <p><span>Rating:</span> {{user.rating || 0}}</p>
         </div>
 
         <div class="rating-block">
@@ -56,9 +55,6 @@ const isAuthorized = useLocalStorage<string>('authorized', 'false', {
   mergeDefaults: true
 })
 
-// const isCommentsRoute = computed(() => {
-//   return router.currentRoute.value.path.match(/comments/)
-// })
 
 const users = ref<UserRegist[]>([]);
 const ratingQuantity = ref<number>(5);
@@ -148,9 +144,25 @@ onMounted(async () => {
   flex-grow: 0;
   display: flex;
   justify-content: space-between;
-  width: calc(50% - 7.5px);
-  padding: 10px;
-  border: 1px solid black;
+  width: calc(25% - 14px);
+  padding: 15px;
+  border-radius: 10px;
+  background: #d7d7d7;
+  box-shadow: 1px 1px 10px white;
+  transition: transform 0.3s ease-in-out 0s;
+  & > .user-info {
+    width: 60%;
+    overflow: hidden;
+    & > p {
+      margin-bottom: 5px;
+      & > span {
+        font-weight: 600;
+      }
+    }
+  }
+  &:hover {
+    transform: perspective(100px) scale3D(1, 1, 1) translateZ(5px);
+  }
 }
 .users-list-link {
   text-decoration: none;
