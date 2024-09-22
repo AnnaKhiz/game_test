@@ -41,12 +41,14 @@
 <script lang="ts" setup>
 import { ref as dbRef, get, child, DatabaseReference } from "firebase/database";
 import { database } from '@/firebase.js';
-import {onMounted, ref, defineProps, computed } from "vue";
+import {onMounted, ref, defineProps, computed, onBeforeUnmount} from "vue";
 import { useRouter, Router } from 'vue-router';
 import { useLocalStorage } from '@vueuse/core';
 import {UserRegist, PropsObject} from '@/interfaces';
 import UiRatingStars from "@/components/UI/uiRatingStars.vue";
 import UiButton from "@/components/UI/uiButton.vue";
+// import {useStore} from "vuex";
+// const store = useStore();
 
 const router: Router = useRouter();
 const props = defineProps<PropsObject>();
@@ -77,7 +79,7 @@ const fetchUsers = async () => {
         const userId = childSnapshot.key;
         const userData = childSnapshot.val();
         console.log(userId, userData)
-        users.value.push({id: userId, ...userData} as UserRegist);
+        users.value.push({id: userId, ...userData } as UserRegist);
       })
     } else {
       console.log("No data");
@@ -104,20 +106,17 @@ const getAuthUserInfo = async () => {
 
 }
 
-// const updateUsersList = (value: EmitUpdateRating) => {
-//   console.log('emited object!!!!!!!!!!!!!!!!!', value)
-//
-//   const index = users.value.findIndex(user => user.id === value.id);
-//
-//   if (index === -1) return;
-//
-//   users.value[index].rating = value.rating;
-// }
 
 onMounted(async () => {
   await fetchUsers();
   await getAuthUserInfo();
 })
+
+onBeforeUnmount(() => {
+  users.value = []
+})
+
+
 
 
 </script>
@@ -131,7 +130,7 @@ onMounted(async () => {
 .container-users {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: stretch;
   flex-wrap: wrap;
   gap: 15px;
   width: 100%;

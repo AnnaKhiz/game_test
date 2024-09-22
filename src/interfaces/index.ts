@@ -5,3 +5,4 @@ export type { Comment } from './Comment';
 export type { EmitUpdateRating } from './EmitUpdateRating';
 export type { RatingStars } from './RatingStars';
 export type { PropsButton } from './PropsButton';
+export type  { PropsComment } from './PropsComment';
