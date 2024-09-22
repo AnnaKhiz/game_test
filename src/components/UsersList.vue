@@ -17,18 +17,17 @@
             <ui-rating-stars :rating="user.rating" :ratingQuantity="ratingQuantity" disable-hover/>
           </div>
 
-          <button
+          <ui-button
             v-if="isAuthorized === 'true'"
+            label="Comments"
             @click="props.admin ? router.push({name: 'admin-comments', params: { userCommentId: user.id}}) : router.push({name: 'users-comments', params: { userCommentId: user.id}})"
-          >
-            Comments
-          </button>
-          <button
+          />
+          <ui-button
             v-else
+            label="Comments"
             @click="router.push({name: 'users-comments', params: { userCommentId: user.id, userId: 'user' }})"
-          >
-            Comments
-          </button>
+          />
+
         </div>
       </div>
     </div>
@@ -48,6 +47,7 @@ import { useRouter, Router } from 'vue-router';
 import { useLocalStorage } from '@vueuse/core';
 import {UserRegist, PropsObject} from '@/interfaces';
 import UiRatingStars from "@/components/UI/uiRatingStars.vue";
+import UiButton from "@/components/UI/uiButton.vue";
 
 const router: Router = useRouter();
 const props = defineProps<PropsObject>();
@@ -171,6 +171,9 @@ onMounted(async () => {
     &.checked {
       color: red;
     }
+  }
+  &:deep > button.custom-button:hover {
+    box-shadow: 1px 1px 6px #424242;
   }
 }
 </style>

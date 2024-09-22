@@ -19,14 +19,17 @@ const props = defineProps<PropsButton>();
   display: block;
   width: 100px;
   padding: 10px 15px;
-  border-radius: 12px;
+  border-radius: 10px;
   border: none;
   cursor: pointer;
-  background-color: #b3ccfa;
-  transition: background-color 0.3s ease-in-out 0s, color 0.3s ease-in-out 0s;
+  color: #e8e8e8;
+  outline: none;
+  box-shadow: 1px 1px 6px #e8e8e8;
+  background-color: #976464;
+  transition: background 0.5s ease-in-out 0s, color 0.3s ease-in-out 0s;
   &:hover {
-    background-color: bisque;
-    color: cornflowerblue;
+    background: #e8e8e8;
+    color: #424242;
   }
 }
 </style>

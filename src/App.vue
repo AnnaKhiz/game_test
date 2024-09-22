@@ -16,6 +16,10 @@ import NavigationComponent from "@/components/NavigationComponent.vue";
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  color: #424242;
+}
+body, html {
+  background-color: #e8e8e8;
 }
 .container {
   margin: 20px 40px;

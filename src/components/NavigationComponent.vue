@@ -1,8 +1,13 @@
 <template>
   <div class="main-navigation">
-    <ui-button label="Home" @click="goToHomePage" background-color="green"/>
-<!--    <button @click="goToHomePage">Home</button>-->
-    <button @click="isAuthorized === 'true' ? logOutUser() : logInUser() ">{{ buttonLabel }}</button>
+    <ui-button
+      label="Home"
+      @click="goToHomePage"
+    />
+    <ui-button
+      :label="buttonLabel"
+      @click="isAuthorized === 'true' ? logOutUser() : logInUser()"
+    />
   </div>
 </template>
 
@@ -51,10 +56,7 @@ const goToHomePage = () => {
   align-items: center;
   justify-content: flex-start;
   gap: 15px;
-  background-color: antiquewhite;
-  & > button {
-    border: 1px solid gray
-  }
+  background: linear-gradient(102.48deg,#976464 -29.03%,#cfa5a5 97.75%);
 }
 
 </style>

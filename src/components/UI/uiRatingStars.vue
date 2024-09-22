@@ -27,18 +27,18 @@ const emit = defineEmits<{
 <style scoped lang="scss">
 .rating-stars {
   cursor: pointer;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   &.checked {
-    color: red;
+    color: #ff8400;
     &.no-hover:hover {
-      color: red;
+      color: #ff8400;
     }
   }
   &:hover {
-    color: red;
+    color: #ff8400;
   }
   &.no-hover:hover {
-    color: black;
+    color: #424242;
   }
 }
 
