@@ -15,14 +15,7 @@
       <div class="rating-block">
         <div>
           <h3>Rate this user</h3>
-          <span
-            v-for="star in ratingQuantity"
-            :key="star"
-            :class="{'checked' : star <= rating}"
-            @click="setRating(star)"
-          >
-          ★
-        </span>
+          <ui-rating-stars :rating="rating" :ratingQuantity="ratingQuantity" @set-rating="setRating"/>
         </div>
       </div>
       <form action="" class="comment-form__form">
@@ -46,7 +39,11 @@
 
       <div v-for="(comment, index) in comments" :key="comment.rating + index" class="comment-list__content">
         <div class="comment-list__item comment">
-          <p class="label">Author: {{ comment.author }}</p>
+          <div class="comment-list__title">
+            <p class="label">Author: {{ comment.author }}</p>
+            <ui-rating-stars :rating-quantity="ratingQuantity" :rating="comment.rating" class="stars" disable-hover/>
+          </div>
+
           <p class="text">{{ comment.text }}</p>
         </div>
         <div class="comment-list__item action">
@@ -70,6 +67,7 @@ import {push, ref as dbRef, set} from "@firebase/database";
 import {Comment, PropsObject, UserRegist } from "@/interfaces";
 import {database} from "@/firebase";
 import {useLocalStorage} from "@vueuse/core";
+import UiRatingStars from "@/components/UI/uiRatingStars.vue";
 
 const isAuthorized = useLocalStorage<string>('authorized', 'false', {
   mergeDefaults: true
@@ -286,11 +284,6 @@ onMounted(async () => {
       max-width: 70%;
       overflow: hidden;
     }
-    & > p.label {
-      font-size: 0.8rem;
-      opacity: 0.7;
-      margin-bottom: 15px;
-    }
     &.action {
       display: flex;
       flex-direction: column;
@@ -298,7 +291,16 @@ onMounted(async () => {
     }
 
   }
-  &__info {
+  &__title {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-bottom: 15px;
+    &:deep > div > .rating-stars {
+      font-size: 0.7rem;
+      cursor: auto;
+    }
 
   }
 }
@@ -357,20 +359,15 @@ onMounted(async () => {
   margin-bottom: 10px;
   align-items: center;
   justify-content: space-between;
-  & > div span {
-    cursor: pointer;
-    font-size: 1.2rem;
-    &.checked {
-      color: red;
-    }
-    &:hover {
-      color: red;
-    }
-  }
   & > div h3 {
     font-weight: 400;
     font-size: 1rem;
     margin-bottom: 5px;
   }
+}
+
+.label {
+  font-size: 0.8rem;
+  opacity: 0.7;
 }
 </style>

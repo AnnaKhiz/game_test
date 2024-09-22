@@ -14,13 +14,7 @@
 
         <div class="rating-block">
           <div>
-          <span
-            v-for="star in ratingQuantity"
-            :key="star"
-            :class="{'checked' : star <= user.rating}"
-          >
-            ★
-          </span>
+            <ui-rating-stars :rating="user.rating" :ratingQuantity="ratingQuantity" disable-hover/>
           </div>
 
           <button
@@ -53,6 +47,7 @@ import {onMounted, ref, defineProps, computed } from "vue";
 import { useRouter, Router } from 'vue-router';
 import { useLocalStorage } from '@vueuse/core';
 import {UserRegist, PropsObject} from '@/interfaces';
+import UiRatingStars from "@/components/UI/uiRatingStars.vue";
 
 const router: Router = useRouter();
 const props = defineProps<PropsObject>();
