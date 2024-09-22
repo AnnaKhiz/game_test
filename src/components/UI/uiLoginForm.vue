@@ -14,11 +14,13 @@
       placeholder="Enter password..."
     />
 
-    <button
-      @click.prevent="logIn"
-    >
-      Log in
-    </button>
+    <p class="info-message " :class="isAuthorized === 'false' ? 'error' : 'success'">{{ infoMessage }}</p>
+
+    <ui-button
+      label="Log in"
+      @action="logIn"
+      :disabled="!validateForm()"
+    />
   </form>
 
   <div class="info-message-block">
@@ -37,9 +39,11 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import "firebase/database";
 import { auth } from '@/firebase.js';
 import { useLocalStorage } from '@vueuse/core';
+import UiButton from "@/components/UI/uiButton.vue";
 const isAuthorized = useLocalStorage<string>('authorized', 'false', {
   mergeDefaults: true
 })
+const infoMessage = ref<string>('');
 
 const props = defineProps<PropsObject>();
 
@@ -48,18 +52,36 @@ const form = ref<UserLogin>({
   password: ''
 })
 
+const validateForm = () => {
+  return Object.values(form.value).every(el => el && el.toString().trim().replaceAll(' ', '') !== '');
+}
+
 const logIn = async () => {
 
   try {
     const userData = await signInWithEmailAndPassword(auth, form.value.email, form.value.password);
-
     isAuthorized.value = 'true'
-    console.log('is ADMIN', props.admin)
 
-    props.admin ? router.push({name: 'admin-users', params: { userId: userData.user.uid }}) : router.push({name: 'users-list-auth', params: { userId: userData.user.uid }})
+    infoMessage.value = 'You logged in successfully!';
+
+    setTimeout(() => {
+      infoMessage.value = '';
+
+      props.admin ? router.push({name: 'admin-users', params: { userId: userData.user.uid }}) : router.push({name: 'users-list-auth', params: { userId: userData.user.uid }})
+    }, 1000)
+
 
   } catch (error) {
-    console.error('Ошибка входа:', error);
+    isAuthorized.value = 'false';
+    if (error instanceof Error) {
+      if (error.message.includes('auth/invalid-email')) {
+        infoMessage.value = 'Invalid email format!';
+      }
+
+      if (error.message.includes('auth/invalid-credential')) {
+        infoMessage.value = props.admin ? 'Admin data not found!' : `User not found!`;
+      }
+    }
   }
 };
 
@@ -67,6 +89,7 @@ const logIn = async () => {
 
 <style scoped lang="scss">
 .login-form {
+  position: relative;
   max-width: 500px;
   margin: 0 auto 30px;
   text-align: left;
@@ -88,7 +111,7 @@ const logIn = async () => {
       box-shadow: 1px 1px 4px gray inset;
     }
     &:last-of-type {
-      margin-bottom: 30px;
+      margin-bottom: 40px;
     }
   }
   &__link {
@@ -99,9 +122,25 @@ const logIn = async () => {
       text-decoration: underline;
     }
   }
+  &:deep > .custom-button:hover {
+    box-shadow: 1px 1px 6px #424242;
+  }
 }
 .info-message-block {
   width: fit-content;
   margin: auto;
+}
+
+.info-message {
+  position: absolute;
+  bottom: 45px;
+  left: 0;
+  font-size: 0.9rem;
+  &.error {
+    color: red;
+  }
+  &.success {
+    color: green;
+  }
 }
 </style>

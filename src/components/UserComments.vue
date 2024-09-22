@@ -48,7 +48,11 @@
         </div>
         <div class="comment-list__item action">
           <p class="label">{{ comment.date }}</p>
-          <button v-if="props.admin" @click.prevent="deleteComment(comment, index)">Delete</button>
+          <ui-button
+            v-if="props.admin"
+            label="Delete"
+            @click.prevent="deleteComment(comment, index)"
+          />
         </div>
 
       </div>
@@ -56,7 +60,10 @@
 
   </div>
 
-  <button @click="router.back()">Go back</button>
+  <ui-button
+    label="Go back"
+    @click.prevent="router.back()"
+  />
 </template>
 
 <script setup lang="ts">
@@ -68,6 +75,7 @@ import {Comment, PropsObject, UserRegist } from "@/interfaces";
 import {database} from "@/firebase";
 import {useLocalStorage} from "@vueuse/core";
 import UiRatingStars from "@/components/UI/uiRatingStars.vue";
+import UiButton from "@/components/UI/uiButton.vue";
 
 const isAuthorized = useLocalStorage<string>('authorized', 'false', {
   mergeDefaults: true
@@ -288,6 +296,10 @@ onMounted(async () => {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
+      gap: 15px;
+      &:deep > .custom-button:hover {
+        box-shadow: 1px 1px 6px #424242;
+      }
     }
 
   }
@@ -345,6 +357,9 @@ onMounted(async () => {
   margin: auto;
   border: 1px solid black;
   padding: 10px;
+  &:deep + .custom-button:hover {
+    box-shadow: 1px 1px 6px #424242;
+  }
 }
 .user-item {
   margin: 0 auto 20px;
@@ -369,5 +384,6 @@ onMounted(async () => {
 .label {
   font-size: 0.8rem;
   opacity: 0.7;
+
 }
 </style>

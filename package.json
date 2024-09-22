@@ -15,8 +15,7 @@
     "vue": "^3.2.13",
     "vue-router": "^4.4.5",
     "vue-yup-form": "^1.0.8",
-    "vuefire": "^3.2.0",
-    "yup": "^1.4.0"
+    "vuefire": "^3.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
@@ -43,9 +42,7 @@
       "plugin:vue/vue3-essential",
       "eslint:recommended",
       "@vue/typescript"
-
     ],
-
     "parserOptions": {
       "parser": "@typescript-eslint/parser"
     },

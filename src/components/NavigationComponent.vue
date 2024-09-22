@@ -2,11 +2,11 @@
   <div class="main-navigation">
     <ui-button
       label="Home"
-      @click="goToHomePage"
+      @action="goToHomePage"
     />
     <ui-button
       :label="buttonLabel"
-      @click="isAuthorized === 'true' ? logOutUser() : logInUser()"
+      @action="isAuthorized === 'true' ? logOutUser() : logInUser()"
     />
   </div>
 </template>

@@ -20,12 +20,12 @@
           <ui-button
             v-if="isAuthorized === 'true'"
             label="Comments"
-            @click="props.admin ? router.push({name: 'admin-comments', params: { userCommentId: user.id}}) : router.push({name: 'users-comments', params: { userCommentId: user.id}})"
+            @action="props.admin ? router.push({name: 'admin-comments', params: { userCommentId: user.id}}) : router.push({name: 'users-comments', params: { userCommentId: user.id}})"
           />
           <ui-button
             v-else
             label="Comments"
-            @click="router.push({name: 'users-comments', params: { userCommentId: user.id, userId: 'user' }})"
+            @action="router.push({name: 'users-comments', params: { userCommentId: user.id, userId: 'user' }})"
           />
 
         </div>
@@ -172,7 +172,7 @@ onMounted(async () => {
       color: red;
     }
   }
-  &:deep > button.custom-button:hover {
+  &:deep > .custom-button:hover {
     box-shadow: 1px 1px 6px #424242;
   }
 }

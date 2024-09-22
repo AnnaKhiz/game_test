@@ -1,6 +1,8 @@
 <template>
   <button
     class="custom-button"
+    :disabled="props.disabled"
+    @click.prevent="emit('action')"
   >
     {{ props.label }}
   </button>
@@ -8,7 +10,9 @@
 
 <script setup lang="ts">
 import type { PropsButton } from "@/interfaces";
-import { defineProps } from 'vue';
+import { defineProps, defineEmits } from 'vue';
+
+const emit = defineEmits(['action'])
 
 const props = defineProps<PropsButton>();
 
@@ -30,6 +34,11 @@ const props = defineProps<PropsButton>();
   &:hover {
     background: #e8e8e8;
     color: #424242;
+  }
+  &:disabled {
+    opacity: 0.3;
+    cursor: none;
+    pointer-events: none;
   }
 }
 </style>
