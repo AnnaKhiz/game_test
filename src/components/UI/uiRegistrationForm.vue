@@ -47,7 +47,7 @@
     <p class="info-message " :class="isAuthorized === 'false' ? 'error' : 'success'">{{ infoMessage }}</p>
 
     <ui-button
-      label="Sign in"
+      label="Sign up"
       @action="submitForm"
       :disabled="form.password !== form.passwordConfirm || disabled || !validateForm()"
     />
