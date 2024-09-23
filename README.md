@@ -1,14 +1,11 @@
 # rating-system
 
-## Project setup
-```
-npm install
-```
+## Stack - Vue3.js (Composition API), Typescript, Vuex, Firebase Realtime Database
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+***Project setup*** - npm install
+
+***Compiles and hot-reloads for development*** - npm run serve
+
 
 ### The project should start on http://localhost:8080/ 
 
