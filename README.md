@@ -10,15 +10,30 @@ npm install
 npm run serve
 ```
 
-### Compiles and minifies for production
-```
-npm run build
-```
+### The project should start on http://localhost:8080/ 
 
-### Lints and fixes files
-```
-npm run lint
-```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+# The content is divided into 3 access levels:
+
+1. Content for unregistered users
+  - Just view users info and comments
+2. Content for registered users
+  - View users info and comments
+  - Add comments and rate users
+3. Admin panel
+  - View users info and comments
+  - Add comments and rate users
+  - Delete comments
+
+***Steps fot sign in:***
+1. Click the button "Log in"
+2. Click the link inside label "Follow *this link* to get registered"
+3. Fill all the fields in registration form and click "Sign in"
+
+***Steps for log in:***
+1. Click the button "Log in"
+2. Fill all the fields in login form and click "Log in"
+
+***Steps for admin:***
+1. Change site url on http://localhost:8080/admin
+2. Enter login: admin@gmail.com, password: admin12 and click "Log in"
