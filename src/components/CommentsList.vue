@@ -1,8 +1,7 @@
 <template>
   <div class="comment-list__container" v-if="store.getters.commentsList.length">
     <h3>User comments</h3>
-{{store.state}}
-    <div v-for="(comment, index) in store.getters.commentsList" :key="comment.rating + index" class="comment-list__content">
+    <div v-for="(comment, index) in store.getters.commentsList" :key="comment.commentId" class="comment-list__content">
       <div class="comment-list__item comment">
         <div class="comment-list__title">
           <p class="label">Author: {{ comment.author }}</p>
@@ -36,20 +35,16 @@ import {Comment, PropsComment} from "@/interfaces";
 import {ref as dbRef} from "@firebase/database";
 import {database} from "@/firebase";
 import { equalTo, get, orderByChild, query,  DatabaseReference, update, remove} from "firebase/database";
-import {onMounted, ref, defineProps, defineEmits } from "vue";
+import {onMounted, defineProps, defineEmits } from "vue";
 import {useStore} from "vuex";
 const store = useStore();
 
-
-const comments = ref<Array<Comment>>();
 const props = defineProps<PropsComment>()
 const emit = defineEmits<{
   (event: 'updateUserRating', payload: number): void
-
 }>()
 
 const updateRating = async (item: number, userId: string): Promise<void> => {
-
   const userRef: DatabaseReference = dbRef(database, `users/${userId}`);
   try {
     await update(userRef, { rating: item });
@@ -59,8 +54,10 @@ const updateRating = async (item: number, userId: string): Promise<void> => {
 }
 
 const countUserRating = async () => {
+
   if (!store.getters.commentsList.length) {
-    store.commit('UPDATE_RATING', 0)
+    await updateRating(0, props.userId );
+    store.commit('UPDATE_RATING', 0);
     emit('updateUserRating', 0);
     return;
   }
@@ -71,10 +68,12 @@ const countUserRating = async () => {
   const ratingAverage = Number((scores / commentsQuantity).toFixed(2));
 
   await updateRating(ratingAverage, props.userId );
-
   store.commit('UPDATE_RATING', ratingAverage)
 
   emit('updateUserRating', ratingAverage);
+
+
+
 }
 const deleteComment = async (comment: Comment, index: number) => {
 
@@ -85,7 +84,6 @@ const deleteComment = async (comment: Comment, index: number) => {
     await remove(userCommentRef);
 
     store.commit('DELETE_COMMENT', index);
-
     await countUserRating();
 
   } catch (error) {
@@ -109,11 +107,12 @@ const getUserComments = async () => {
       })
 
       store.commit('UPDATE_COMMENTS_LIST', comments);
-
       await countUserRating();
 
     } else {
-      console.log('No comments found for this user.');
+      store.commit('RESET_COMMENTS_LIST')
+
+      await countUserRating();
       return null;
     }
   } catch (error) {
@@ -122,11 +121,7 @@ const getUserComments = async () => {
 }
 
 onMounted (async () => {
-  await getUserComments()
-
-
-  console.log(comments.value)
-
+  await getUserComments();
 })
 
 </script>

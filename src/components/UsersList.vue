@@ -41,14 +41,12 @@
 <script lang="ts" setup>
 import { ref as dbRef, get, child, DatabaseReference } from "firebase/database";
 import { database } from '@/firebase.js';
-import {onMounted, ref, defineProps, computed, onBeforeUnmount} from "vue";
+import {onMounted, ref, defineProps, computed } from "vue";
 import { useRouter, Router } from 'vue-router';
 import { useLocalStorage } from '@vueuse/core';
 import {UserRegist, PropsObject} from '@/interfaces';
 import UiRatingStars from "@/components/UI/uiRatingStars.vue";
 import UiButton from "@/components/UI/uiButton.vue";
-// import {useStore} from "vuex";
-// const store = useStore();
 
 const router: Router = useRouter();
 const props = defineProps<PropsObject>();
@@ -78,7 +76,7 @@ const fetchUsers = async () => {
       snapshot.forEach(childSnapshot => {
         const userId = childSnapshot.key;
         const userData = childSnapshot.val();
-        console.log(userId, userData)
+
         users.value.push({id: userId, ...userData } as UserRegist);
       })
     } else {
@@ -112,13 +110,6 @@ onMounted(async () => {
   await getAuthUserInfo();
 })
 
-onBeforeUnmount(() => {
-  users.value = []
-})
-
-
-
-
 </script>
 
 
@@ -129,7 +120,7 @@ onBeforeUnmount(() => {
 }
 .container-users {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: stretch;
   flex-wrap: wrap;
   gap: 15px;

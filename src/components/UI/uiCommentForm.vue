@@ -17,6 +17,7 @@
       <ui-button
         label="Save comment"
         @click="saveComment"
+        :disabled="!validateForm()"
       />
     </form>
   </div>
@@ -51,6 +52,11 @@ const form = ref<Comment>({
   author: ''
 })
 
+const validateForm = () => {
+  const validFormData = {rating: form.value.rating, text: form.value.text}
+  return Object.values(validFormData).every(el => el && el.toString().trim().replaceAll(' ', '') !== '');
+}
+
 const props = defineProps<PropsCommentForm>();
 const rating = ref<number>(props.user.rating || 0)
 
@@ -58,10 +64,6 @@ const setRating = async (item: number): Promise<void> => {
   rating.value = item;
   form.value.rating = item;
 }
-// const emit = defineEmits<{
-//   (event: 'updateUserRating', payload: number): void
-//   (event: 'addComment', payload: Comment): void
-// }>()
 
 const saveComment = async () => {
   const data = new Date().toLocaleString();
@@ -73,15 +75,16 @@ const saveComment = async () => {
 const addCommentRequest = async () => {
   try {
     const newCommentRef = push(dbRef(database, 'comments/'));
-    const commentId = newCommentRef.key;
+    const commentId = newCommentRef.key as string;
 
     await set(newCommentRef, { ...form.value, userId: props.user.id, commentId: commentId });
 
+    const userCommentsRef = dbRef(database, `users/${props.user.id}/comments`);
+    await update(userCommentsRef, {
+      [commentId]: true
+    });
 
-    const userCommentsRef = dbRef(database, `users/${props.user.id}/comments/${commentId}`);
-    await set(userCommentsRef, true);
-
-    store.commit('UNSHIFT_COMMENTS_LIST', { ...form.value, commentId })
+    store.commit('UNSHIFT_COMMENTS_LIST', { ...form.value, commentId });
 
     await countUserRating();
     resetFormData();
@@ -89,23 +92,6 @@ const addCommentRequest = async () => {
   } catch (error) {
     console.log(error)
   }
-
-  // try {
-  //   const newCommentRef = push(dbRef(database, 'comments/'));
-  //   await set(newCommentRef, { ...form.value, userId: props.user.id });
-  //
-  //   const commentId = newCommentRef.key;
-  //   const userCommentsRef = dbRef(database, `users/${props.user.id}/comments/${commentId}`);
-  //   await set(userCommentsRef, true);
-  //
-  //   store.commit('UNSHIFT_COMMENTS_LIST', form.value)
-  //
-  //   await countUserRating();
-  //   resetFormData();
-  //
-  // } catch (error) {
-  //   console.log(error)
-  // }
 }
 
 const resetFormData = () => {
@@ -130,6 +116,7 @@ const updateRating = async (item: number, userId: string): Promise<void> => {
 }
 
 const countUserRating = async () => {
+
   if (!store.getters.commentsList.length) {
     store.commit('UPDATE_RATING', 0)
     emit('updateUserRating', 0);
@@ -141,14 +128,11 @@ const countUserRating = async () => {
   const scores = currentCommentsArray.reduce((acc: number, curValue: Comment) => curValue.rating + acc, 0 );
   const ratingAverage = Number((scores / commentsQuantity).toFixed(2));
 
-  emit('updateUserRating', ratingAverage);
-  await updateRating(ratingAverage, props.userId );
 
   store.commit('UPDATE_RATING', ratingAverage)
+  emit('updateUserRating', ratingAverage);
 
-
-
-
+  await updateRating(ratingAverage, props.user.id as string);
 }
 
 </script>
