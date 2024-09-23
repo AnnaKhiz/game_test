@@ -31,48 +31,48 @@
 </template>
 
 <script setup lang="ts">
-import {defineProps, ref} from "vue";
+import {defineProps, onUnmounted, ref} from "vue";
 import type { UserLogin, PropsObject } from '@/interfaces';
-import {  useRouter, Router } from 'vue-router'
-const router: Router = useRouter();
+import {  useRouter, Router } from 'vue-router';
 import { signInWithEmailAndPassword } from "firebase/auth";
 import "firebase/database";
 import { auth } from '@/firebase.js';
 import { useLocalStorage } from '@vueuse/core';
 import UiButton from "@/components/UI/uiButton.vue";
-const isAuthorized = useLocalStorage<string>('authorized', 'false', {
-  mergeDefaults: true
-})
+
+const router: Router = useRouter();
+let timeoutId: ReturnType<typeof setTimeout>;
 const infoMessage = ref<string>('');
-
 const props = defineProps<PropsObject>();
-
 const form = ref<UserLogin>({
   email: '',
   password: ''
-})
+});
 
-const validateForm = () => {
+const isAuthorized = useLocalStorage<string>('authorized', 'false', {
+  mergeDefaults: true
+});
+
+const validateForm = (): boolean => {
   return Object.values(form.value).every(el => el && el.toString().trim().replaceAll(' ', '') !== '');
 }
 
-const logIn = async () => {
+const logIn = async (): Promise<void> => {
 
   try {
     const userData = await signInWithEmailAndPassword(auth, form.value.email, form.value.password);
-    isAuthorized.value = 'true'
+    isAuthorized.value = 'true';
 
     infoMessage.value = 'You logged in successfully!';
 
-    setTimeout(() => {
+    timeoutId = setTimeout(() => {
       infoMessage.value = '';
+      router.push({ name: props.admin ? 'admin-users' : 'users-list-auth', params: { userId: userData.user.uid } })
+    }, 1000);
 
-      props.admin ? router.push({name: 'admin-users', params: { userId: userData.user.uid }}) : router.push({name: 'users-list-auth', params: { userId: userData.user.uid }})
-    }, 1000)
-
-
-  } catch (error) {
+  } catch (error: unknown) {
     isAuthorized.value = 'false';
+
     if (error instanceof Error) {
       if (error.message.includes('auth/invalid-email')) {
         infoMessage.value = 'Invalid email format!';
@@ -84,6 +84,8 @@ const logIn = async () => {
     }
   }
 };
+
+onUnmounted((): void => clearTimeout(timeoutId));
 
 </script>
 
@@ -105,7 +107,6 @@ const logIn = async () => {
     border-radius: 12px;
     border: none;
     box-shadow: 1px 1px 3px gray;
-
     &:focus {
       outline: none;
       box-shadow: 1px 1px 4px gray inset;

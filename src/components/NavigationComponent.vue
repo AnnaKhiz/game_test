@@ -13,8 +13,8 @@
 
 
 <script setup lang="ts">
-import {computed} from 'vue';
-import { useRouter, Router } from 'vue-router'
+import { computed } from 'vue';
+import { useRouter, Router } from 'vue-router';
 import { useLocalStorage } from '@vueuse/core';
 import UiButton from "@/components/UI/uiButton.vue";
 
@@ -23,27 +23,27 @@ const isAuthorized = useLocalStorage<string>('authorized', 'false', {
   mergeDefaults: true
 })
 
-const logInUser = () => {
+const buttonLabel = computed((): string => isAuthorized.value === 'true' ? 'Logout' : 'Log in');
+
+const logInUser = (): void => {
   router.push({name: 'login'})
 }
 
-const logOutUser = () => {
+const logOutUser = (): void => {
   isAuthorized.value = 'false';
-  router.push({name: 'users-list'})
+  router.push({ name: 'users-list' });
 }
 
-const buttonLabel = computed(() => isAuthorized.value === 'true' ? 'Logout' : 'Log in')
-
-const goToHomePage = () => {
+const goToHomePage = (): void => {
   if (router.currentRoute.value.path.match(/^\/admin/)) {
-    router.push({name: 'admin-users'})
-    return
+    router.push({ name: 'admin-users' });
+    return;
   }
   if (isAuthorized.value === 'true') {
-    router.push({name: 'users-list-auth'})
-    return
+    router.push({ name: 'users-list-auth' });
+    return;
   }
-  router.push({name: 'users-list'})
+  router.push({name: 'users-list'});
 }
 
 </script>

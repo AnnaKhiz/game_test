@@ -1,5 +1,5 @@
 export interface PropsComment {
-  ratingQuantity: number;
+  ratingQuantity?: number;
   admin?: boolean;
   userId: string;
 }

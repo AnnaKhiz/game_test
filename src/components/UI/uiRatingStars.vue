@@ -1,7 +1,7 @@
 <template>
   <div>
     <span
-      v-for="star in props.ratingQuantity"
+      v-for="star in store.getters.ratingQuantity"
       :key="star"
       class="rating-stars"
       :class="[{'checked' : star <= props.rating}, { 'no-hover': props.disableHover }]"
@@ -16,6 +16,8 @@
 <script setup lang="ts">
 import { RatingStars } from "@/interfaces";
 import { defineProps, defineEmits } from "vue";
+import {useStore} from "vuex";
+const store = useStore();
 
 const props: RatingStars = defineProps<RatingStars>();
 const emit = defineEmits<{

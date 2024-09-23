@@ -4,7 +4,7 @@ import LogInRegistrationPage from "@/components/LogInRegistrationPage.vue";
 import AdminMainPage from "@/components/admin/AdminMainPage.vue";
 import AdminLogin from "@/components/admin/AdminLogin.vue";
 import UserComments from "@/components/UserComments.vue";
-import { RouteLocationNormalized, RouteRecordRaw } from 'vue-router'
+import { RouteLocationNormalized, RouteRecordRaw } from 'vue-router';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -12,18 +12,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'users-list',
     component: UsersList,
     props: true,
-    meta: {
-      title: 'Users list',
-    },
   },
   {
     path: '/:userId',
     name: 'users-list-auth',
     component: UsersList,
     props: true,
-    meta: {
-      title: 'Users list',
-    },
   },
   {
     path: '/:userId/comments/:userCommentId',
@@ -34,9 +28,6 @@ const routes: Array<RouteRecordRaw> = [
         userId: route.params.userId || '123',
         userCommentId: route.params.userCommentId
       }),
-    meta: {
-      title: 'User comments',
-    },
   },
 
   {
@@ -44,18 +35,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'register',
     component: LogInRegistrationPage,
     props: true,
-    meta: {
-      title: 'Registration page',
-    },
   },
   {
     path: '/login',
     name: 'login',
     component: LogInRegistrationPage,
     props: true,
-    meta: {
-      title: 'Login page',
-    },
   },
   {
     path: '/admin',
@@ -63,7 +48,6 @@ const routes: Array<RouteRecordRaw> = [
     component: AdminMainPage,
     props: { admin: true },
     meta: {
-      title: 'Admin page',
       requiresAuth: true
     },
     children: [
@@ -93,12 +77,7 @@ const routes: Array<RouteRecordRaw> = [
             userId: route.params.userId,
             admin: true
           }),
-        meta: {
-          title: 'User comments',
-        },
       }
-
-
     ]
   },
 ]
@@ -107,7 +86,6 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 })
-
 
 router.beforeEach((to, from, next) => {
 

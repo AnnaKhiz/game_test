@@ -1,11 +1,13 @@
 <template>
   <div class="comment-form__container">
+
     <div class="rating-block">
       <div class="rating-scores">
         <h3>Rate this user</h3>
-        <ui-rating-stars :rating="form.rating" :ratingQuantity="props.ratingQuantity" @set-rating="setRating"/>
+        <ui-rating-stars :rating="form.rating" @set-rating="setRating"/>
       </div>
     </div>
+
     <form action="" class="comment-form__form">
       <label for="text" class="comment-form__label">Comment</label>
       <textarea
@@ -24,27 +26,18 @@
 </template>
 
 <script setup lang="ts">
-
 import UiButton from "@/components/UI/uiButton.vue";
 import UiRatingStars from "@/components/UI/uiRatingStars.vue";
 import {defineEmits, defineProps, ref} from "vue";
-import {Comment, PropsComment, UserRegist} from "@/interfaces";
+import {Comment, PropsCommentForm } from "@/interfaces";
 import {push, ref as dbRef, set} from "@firebase/database";
 import {database} from "@/firebase";
 import {useStore} from "vuex";
 import {DatabaseReference, update} from "firebase/database";
+
 const store = useStore();
-
-const emit = defineEmits<{
-  (event: 'updateUserRating', payload: number): void
-
-}>()
-
-interface PropsCommentForm extends PropsComment {
-  authUser: UserRegist;
-  user: UserRegist;
-}
-
+const props = defineProps<PropsCommentForm>();
+const rating = ref<number>(props.user.rating || 0);
 const form = ref<Comment>({
   rating: 0,
   text: '',
@@ -52,34 +45,34 @@ const form = ref<Comment>({
   author: ''
 })
 
-const validateForm = () => {
-  const validFormData = {rating: form.value.rating, text: form.value.text}
+const emit = defineEmits<{
+  (event: 'updateUserRating', payload: number): void
+}>()
+
+const validateForm = (): boolean => {
+  const validFormData = { rating: form.value.rating, text: form.value.text }
   return Object.values(validFormData).every(el => el && el.toString().trim().replaceAll(' ', '') !== '');
 }
-
-const props = defineProps<PropsCommentForm>();
-const rating = ref<number>(props.user.rating || 0)
 
 const setRating = async (item: number): Promise<void> => {
   rating.value = item;
   form.value.rating = item;
 }
-
-const saveComment = async () => {
+const saveComment = async (): Promise<void> => {
   const data = new Date().toLocaleString();
   form.value.date = data;
-  form.value.author = props.authUser.surname + ' ' + props.authUser.name
+  form.value.author = props.authUser.surname + ' ' + props.authUser.name;
   await addCommentRequest();
 }
 
-const addCommentRequest = async () => {
+const addCommentRequest = async (): Promise<void> => {
   try {
-    const newCommentRef = push(dbRef(database, 'comments/'));
+    const newCommentRef: DatabaseReference = push(dbRef(database, 'comments/'));
     const commentId = newCommentRef.key as string;
 
     await set(newCommentRef, { ...form.value, userId: props.user.id, commentId: commentId });
 
-    const userCommentsRef = dbRef(database, `users/${props.user.id}/comments`);
+    const userCommentsRef: DatabaseReference = dbRef(database, `users/${props.user.id}/comments`);
     await update(userCommentsRef, {
       [commentId]: true
     });
@@ -90,11 +83,11 @@ const addCommentRequest = async () => {
     resetFormData();
 
   } catch (error) {
-    console.log(error)
+    console.error('Error in add comment request: ', error);
   }
 }
 
-const resetFormData = () => {
+const resetFormData = (): void => {
   rating.value = 0;
   form.value = {
     rating: 0,
@@ -104,39 +97,35 @@ const resetFormData = () => {
   }
 }
 
-
 const updateRating = async (item: number, userId: string): Promise<void> => {
 
   const userRef: DatabaseReference = dbRef(database, `users/${userId}`);
   try {
     await update(userRef, { rating: item });
   } catch (error) {
-    console.log(error)
+    console.error('Error in updating rating: ', error);
   }
 }
 
-const countUserRating = async () => {
+const countUserRating = async (): Promise<void> => {
 
   if (!store.getters.commentsList.length) {
-    store.commit('UPDATE_RATING', 0)
+    store.commit('UPDATE_RATING', 0);
     emit('updateUserRating', 0);
     return;
   }
 
-  const commentsQuantity = store.getters.commentsList.length;
-  const currentCommentsArray = [...store.getters.commentsList];
+  const commentsQuantity: number = store.getters.commentsList.length;
+  const currentCommentsArray: Array<Comment> = [...store.getters.commentsList];
   const scores = currentCommentsArray.reduce((acc: number, curValue: Comment) => curValue.rating + acc, 0 );
   const ratingAverage = Number((scores / commentsQuantity).toFixed(2));
 
-
-  store.commit('UPDATE_RATING', ratingAverage)
+  store.commit('UPDATE_RATING', ratingAverage);
   emit('updateUserRating', ratingAverage);
-
   await updateRating(ratingAverage, props.user.id as string);
 }
 
 </script>
-
 
 
 <style scoped lang="scss">
@@ -180,7 +169,6 @@ const countUserRating = async () => {
     display: block;
     margin-bottom: 5px;
   }
-
 }
 
 .rating-block {

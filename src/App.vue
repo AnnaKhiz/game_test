@@ -7,8 +7,6 @@
 
 <script lang="ts" setup>
 import NavigationComponent from "@/components/NavigationComponent.vue";
-
-
 </script>
 
 <style>
@@ -19,9 +17,15 @@ import NavigationComponent from "@/components/NavigationComponent.vue";
   color: #424242;
 }
 body, html {
+  height: 100vh;
   background-color: #e8e8e8;
 }
+#app {
+  height: 80%
+}
+
 .container {
+  height: 100%;
   margin: 20px 40px;
 }
 

@@ -12,9 +12,8 @@
 import type { PropsButton } from "@/interfaces";
 import { defineProps, defineEmits } from 'vue';
 
-const emit = defineEmits(['action'])
-
 const props = defineProps<PropsButton>();
+const emit = defineEmits(['action']);
 
 </script>
 

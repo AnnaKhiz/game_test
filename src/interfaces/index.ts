@@ -6,3 +6,4 @@ export type { RatingStars } from './RatingStars';
 export type { PropsButton } from './PropsButton';
 export type  { PropsComment } from './PropsComment';
 export type { MainState} from './MainState';
+export type { PropsCommentForm } from './PropsCommentForm';

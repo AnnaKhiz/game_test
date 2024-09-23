@@ -56,26 +56,19 @@
 </template>
 
 <script setup lang="ts">
-
-import {onMounted, ref, computed} from "vue";
+import {onMounted, ref, computed, onUnmounted} from "vue";
 import {  useRouter, Router } from 'vue-router';
 import type { UserRegist } from '@/interfaces';
-import { createUserWithEmailAndPassword } from "firebase/auth"
-import { set, ref as dbRef } from "firebase/database";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import {set, ref as dbRef, DatabaseReference} from "firebase/database";
 import { useLocalStorage } from '@vueuse/core';
 import "firebase/database";
 import { database, auth } from '@/firebase.js';
 import UiButton from "@/components/UI/uiButton.vue";
 
-
 const router: Router = useRouter();
-
-const isAuthorized = useLocalStorage<string>('authorized', 'false', {
-  mergeDefaults: true
-})
-
-
 const message = ref<string>('');
+let timeoutId: ReturnType<typeof setTimeout>;
 const form = ref<UserRegist>({
   name: '',
   surname: '',
@@ -84,7 +77,11 @@ const form = ref<UserRegist>({
   passwordConfirm: ''
 });
 
-const disabled = computed(() => {
+const isAuthorized = useLocalStorage<string>('authorized', 'false', {
+  mergeDefaults: true
+})
+
+const disabled = computed((): boolean => {
   const regex = /^\S*$/;
   const password = form.value.password as string
   const passwordConfirm = form.value.passwordConfirm as string;
@@ -92,32 +89,32 @@ const disabled = computed(() => {
   return !regex.test(password) || !regex.test(passwordConfirm);
 })
 
-const infoMessage = computed(() => disabled.value ? 'Field \'Password\' or \'Confirm password\' contain spaces!' : message.value)
+const infoMessage = computed((): string => disabled.value ? 'Field \'Password\' or \'Confirm password\' contain spaces!' : message.value);
 
-const errorHandler = () => {
+const errorHandler = (): void => {
   form.value.password !== form.value.passwordConfirm ? message.value = 'Passwords are not equal or contain spaces!' : message.value = ''
 }
 
-const validateForm = () => {
+const validateForm = (): boolean => {
   return Object.values(form.value).every(el => el && el.toString().trim().replaceAll(' ', '') !== '');
 }
 
-
-const submitForm = async () => {
+const submitForm = async (): Promise<void> => {
 
   if (!validateForm() && disabled) {
-    return
+    return;
   }
 
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, form.value.email, form.value.password as string);
     const user = userCredential.user;
 
-    const newUserRef = dbRef(database, 'users/' + user.uid);
-    const { name, surname, email } = form.value;
-    const newUserData = {  name, surname, email, rating: 0 };
+    const newUserRef: DatabaseReference = dbRef(database, 'users/' + user.uid);
+    const {name, surname, email} = form.value;
+    const newUserData = {name, surname, email, rating: 0};
 
     await set(newUserRef, newUserData);
+
     isAuthorized.value = 'true';
     form.value = {
       name: '',
@@ -129,11 +126,9 @@ const submitForm = async () => {
 
     message.value = 'User successfully added.';
 
-
-    setTimeout(() => {
+    timeoutId = setTimeout(() => {
       message.value = '';
-
-      router.push({name: 'users-list-auth', params: { userId: user.uid }});
+      router.push({name: 'users-list-auth', params: {userId: user.uid}});
     }, 1000)
 
   } catch (error: unknown) {
@@ -147,15 +142,17 @@ const submitForm = async () => {
       }
     }
   }
-onMounted(() => {
-  message.value = ''
-})
 }
+
+onMounted((): void => {
+  message.value = '';
+})
+
+onUnmounted((): void => clearTimeout(timeoutId));
 
 </script>
 
 <style scoped lang="scss">
-
 .registration-form {
   position: relative;
   max-width: 500px;
