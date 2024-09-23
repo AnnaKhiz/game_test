@@ -22,10 +22,10 @@
   - Add comments and rate users
   - Delete comments
 
-***Steps fot sign in:***
+***Steps fot sign up:***
 1. Click the button "Log in"
 2. Click the link inside label "Follow *this link* to get registered"
-3. Fill all the fields in registration form and click "Sign in"
+3. Fill all the fields in registration form and click "Sign up"
 
 ***Steps for log in:***
 1. Click the button "Log in"
